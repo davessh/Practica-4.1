@@ -13,7 +13,11 @@ public class VentanaJuego {
     private JPanel panelSeleccionados;
     private JFrame frame;
 
+    private Jugador jugador;
+
     public VentanaJuego() {
+
+        jugador = new Jugador("Jugador 1");
 
         frame = new JFrame("Juego Farkle");
         frame.setSize(800, 800);
@@ -45,29 +49,23 @@ public class VentanaJuego {
     }
 
     private void tirarDados() {
-int tamaño = dadosLanzados.size();
-System.out.println(tamaño);
-if (tamaño == 0) {
-    tamaño = 6;
-}
+        ArrayList<Dado> dadosGenerados = jugador.tirarDados();
+
         panelLanzados.removeAll();
         dadosLanzados.clear();
-        for (int i = 0; i < tamaño; i++) {
 
-            Dado dado = new Dado();
-
-
+        for (Dado dado : dadosGenerados) {
             dado.getBoton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent ev) {
                     moverDado(dado);
                 }
             });
-
             dadosLanzados.add(dado);
             panelLanzados.add(dado.getBoton());
         }
 
+        // Actualizar la interfaz
         panelLanzados.revalidate();
         panelLanzados.repaint();
     }
@@ -84,6 +82,7 @@ if (tamaño == 0) {
         panelSeleccionados.revalidate();
         panelSeleccionados.repaint();
     }
+
     public static void main(String[] args) {
         new VentanaJuego();
     }
