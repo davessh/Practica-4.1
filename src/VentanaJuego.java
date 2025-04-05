@@ -8,6 +8,7 @@ public class VentanaJuego {
 
     private ArrayList<Dado> dadosLanzados = new ArrayList<>();
     private ArrayList<Dado> dadosSeleccionados = new ArrayList<>();
+    private ArrayList<Jugador> jugadores = new ArrayList<>();  // ArrayList para los jugadores
 
     private JPanel panelLanzados;
     private JPanel panelSeleccionados;
@@ -16,8 +17,19 @@ public class VentanaJuego {
     private Jugador jugador;
 
     public VentanaJuego() {
+        int cantidadJugadores = 2;
+        for (int i = 0; i < cantidadJugadores; i++) {
+            String nombreJugador = JOptionPane.showInputDialog(frame, "Ingresa el nombre del jugador " + (i + 1) + ":");
 
-        jugador = new Jugador("Jugador 1");
+            //nombres si no se ingresa nada
+            if (nombreJugador == null || nombreJugador.trim().isEmpty()) {
+                nombreJugador = "Jugador" + (i + 1);
+            }
+
+            jugadores.add(new Jugador(nombreJugador));
+        }
+
+        jugador = jugadores.get(0);
 
         frame = new JFrame("Juego Farkle");
         frame.setSize(800, 800);
@@ -65,7 +77,6 @@ public class VentanaJuego {
             panelLanzados.add(dado.getBoton());
         }
 
-        // Actualizar la interfaz
         panelLanzados.revalidate();
         panelLanzados.repaint();
     }
@@ -84,7 +95,7 @@ public class VentanaJuego {
     }
 
     public static void main(String[] args) {
-        new VentanaJuego();
+        new VentanaJuego();  // Iniciar el juego
     }
 }
 
