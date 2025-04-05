@@ -12,7 +12,7 @@ public class Dado {
     public void lanzar() {
         Random rnd = new Random();
         valor = rnd.nextInt(6) +1;
-        String ruta = "G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\dado" + valor + ".png";
+        String ruta = "C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\dado" + valor + ".png";
         Icon icono = new ImageIcon(ruta);
 
         Image img = ((ImageIcon) icono).getImage();

@@ -14,7 +14,7 @@ public class Main {
         Dado dado = new Dado();
         panel.add(dado.getBoton());
         JFrame frame = new JFrame("Farkle");
-        frame.setSize(500, 500);
+        frame.setSize(900, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(panel);
         frame.setVisible(true);
