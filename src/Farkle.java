@@ -1,7 +1,3 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class Farkle {
@@ -9,11 +5,7 @@ public class Farkle {
     private ArrayList<Dado> dadosSeleccionados;
     private ArrayList<Jugador> jugadores;
     private int puntosTurno;
-//    private JFrame frame;
-//
-//    public Farkle() {
-//        mostrarMenu();
-//    }
+    boolean esEscalera = true;
 
     public Farkle() {
         //this.jugadores = jugadores;
@@ -62,9 +54,15 @@ public class Farkle {
                 combinacion = true;
             }
         }
-        //Si hay escalera
-        if (contador[1]==1 && contador[2]==1 && contador[3]==1 &&
-                contador[4]==1 && contador[5]==1 && contador[6]==1) {
+        // se verifica si es escalera
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] != 1) {
+                esEscalera = false;
+                break;
+            }
+        }
+
+        if (esEscalera) {
             combinacion = true;
         }
 
@@ -82,6 +80,8 @@ public class Farkle {
         return combinacion;
 
     }
+
+
 
     public void seleccionarDado(Dado dado) {
         dadosEnJuego.remove(dado);
