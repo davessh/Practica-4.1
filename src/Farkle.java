@@ -6,6 +6,7 @@ public class Farkle {
     private ArrayList<Jugador> jugadores;
     private int puntosTurno;
     boolean esEscalera = true;
+    boolean todosIguales = true;
 
     public Farkle() {
         //this.jugadores = jugadores;
@@ -81,6 +82,20 @@ public class Farkle {
 
     }
 
+    //método diseñado para determinar si todos mis valores tirados son iguales
+    public boolean sonTodosIguales(){
+        if (dadosEnJuego.isEmpty()){
+            return false;
+        }
+
+        int valorInicial = dados.get(0).getValor();
+        for(Dado dado : dadosEnJuego){
+            if(dado.getValor() != valorInicial){
+                return false;
+            }
+            }
+        return true;
+        }
 
 
     public void seleccionarDado(Dado dado) {
