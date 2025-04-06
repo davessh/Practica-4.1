@@ -5,15 +5,15 @@ import java.util.Random;
 public class Dado {
     private int valor;
     private JButton boton;
+    private static Random rnd = new Random();
 
     public Dado() {
         lanzar();
     }
     public void lanzar() {
-        Random rnd = new Random();
         valor = rnd.nextInt(6) +1;
-        //String ruta = ""
-        String ruta = "C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\dado" + valor + ".png";
+        String ruta = "G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\dado" + valor + ".png";
+        //String ruta = "C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\dado" + valor + ".png";
         Icon icono = new ImageIcon(ruta);
 
         Image img = ((ImageIcon) icono).getImage();

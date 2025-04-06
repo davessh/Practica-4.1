@@ -2,59 +2,100 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class Farkle {
-    private JFrame frame;
+    private ArrayList<Dado> dadosEnJuego;
+    private ArrayList<Dado> dadosSeleccionados;
+    private ArrayList<Jugador> jugadores;
+    private int puntosTurno;
+//    private JFrame frame;
+//
+//    public Farkle() {
+//        mostrarMenu();
+//    }
 
     public Farkle() {
-        mostrarMenu();
+        //this.jugadores = jugadores;
+        dadosEnJuego = new ArrayList<>();
+        dadosSeleccionados = new ArrayList<>();
+        puntosTurno = 0;
     }
 
     public void comenzarJuego() {
+        boolean continuar = true;
+        while (continuar) {
+            dadosEnJuego = lanzarDados();
+            if(hayCombinaciones(dadosEnJuego)){
+
+            }
+
+        }
 
     }
-    private void mostrarMenu() {
-        frame = new JFrame("Menú Farkle");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 400);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout());
 
-        JPanel panelMenu = new JPanel();
-        panelMenu.setLayout(new BoxLayout(panelMenu, BoxLayout.Y_AXIS));
-        panelMenu.setBackground(Color.GREEN);
-
-        ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo.png");
-        JLabel etiquetaImagen = new JLabel(icono);
-        etiquetaImagen.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelMenu.add(Box.createVerticalStrut(20));
-        panelMenu.add(etiquetaImagen);
-
-        JButton btnJugar = new JButton("Jugar");
-        btnJugar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnJugar.setMaximumSize(new Dimension(200, 40));
-        panelMenu.add(Box.createVerticalStrut(30));
-        panelMenu.add(btnJugar);
-
-        JButton btnSalir = new JButton("Salir");
-        btnSalir.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnSalir.setMaximumSize(new Dimension(200, 40));
-        panelMenu.add(Box.createVerticalStrut(10));
-        panelMenu.add(btnSalir);
-
-        btnSalir.addActionListener(e -> System.exit(0));
-
-        btnJugar.addActionListener(e -> {
-            frame.dispose();
-            new VentanaJuego();
-        });
-
-        frame.add(panelMenu, BorderLayout.CENTER);
-        frame.setVisible(true);
+    public ArrayList<Dado> lanzarDados() {
+        dadosEnJuego.clear();
+        int cantidadDados = 6 - dadosSeleccionados.size();
+        System.out.println("cantidad de dados: " + cantidadDados);
+        for (int i = 0; i < cantidadDados; i++) {
+            dadosEnJuego.add(new Dado());
+        }
+        return dadosEnJuego;
     }
+
+    public boolean hayCombinaciones(ArrayList<Dado> dados) {
+        int[] contador = new int[7];
+        //Se cuenta cuántas veces salió un valor en los dados lanzados y sirve para saber cuales valores podrían formar combinaciones
+        for(Dado dado : dadosEnJuego){
+            contador[dado.getValor()]++;
+        }
+        boolean combinacion = false;
+
+        //Si hay unos o cincos
+        if (contador[1] > 0 || contador[5] > 0) {
+            combinacion = true;
+        }
+        //Si hay tres del mismo valor
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 3) {
+                combinacion = true;
+            }
+        }
+        //Si hay escalera
+        if (contador[1]==1 && contador[2]==1 && contador[3]==1 &&
+                contador[4]==1 && contador[5]==1 && contador[6]==1) {
+            combinacion = true;
+        }
+
+        //Si hay 3 pares
+        int pares = 0;
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] == 2) {
+                pares++;
+            }
+        }
+        if (pares == 3) {
+            combinacion = true;
+        }
+
+        return combinacion;
+
+    }
+
+    public void seleccionarDado(Dado dado) {
+        dadosEnJuego.remove(dado);
+        dadosSeleccionados.add(dado);
+    }
+
+    public void deseleccionarDado(Dado dado) {
+        dadosSeleccionados.remove(dado);
+        dadosEnJuego.add(dado);
+    }
+
 
 
     public static void main(String[] args) {
-        new Farkle();
+       // new Farkle();
     }
 }
