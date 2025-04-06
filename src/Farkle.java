@@ -7,22 +7,44 @@ public class Farkle {
     private int puntosTurno;
     boolean esEscalera = true;
     boolean todosIguales = true;
+    private int turnoActual;
 
     public Farkle() {
-        //this.jugadores = jugadores;
+        jugadores = new ArrayList<>();
         dadosEnJuego = new ArrayList<>();
         dadosSeleccionados = new ArrayList<>();
+        turnoActual = 0;
         puntosTurno = 0;
     }
 
     public void comenzarJuego() {
-        boolean continuar = true;
-        while (continuar) {
+        jugadores.add(new Jugador("player 1"));
+        jugadores.add(new Jugador("player 2"));
+        while (true) {
+            Jugador jugadorActual = jugadores.get(turnoActual);
+            jugadorActual.iniciarTurno();
             dadosEnJuego = lanzarDados();
-            if(hayCombinaciones(dadosEnJuego)){
 
+            boolean tieneCombinacion = hayCombinaciones(dadosEnJuego);
+            if (tieneCombinacion) {
+                jugadorActual.sumarPuntos(calcularPuntos(dadosEnJuego));
+                System.out.println(jugadorActual.getNombre() + " tiene puntos de combinacion");
+            }
+            else {
+                System.out.println(jugadorActual.getNombre() + "Farkle,no tiene combinación");
+                jugadorActual.terminarTurno(false);
+                turnoActual = (turnoActual + 1) % jugadores.size();
+                continue;
             }
 
+            if (jugadorActual.getPuntuacionTotal() >= 10000) {
+                System.out.println(jugadorActual.getNombre() + " ha ganado el juego!");
+                break;  // Termina el juego
+            }
+
+
+            jugadorActual.terminarTurno(false);
+            turnoActual = (turnoActual + 1) % jugadores.size();
         }
 
     }
@@ -108,9 +130,20 @@ public class Farkle {
         dadosEnJuego.add(dado);
     }
 
-
-
-    public static void main(String[] args) {
-       // new Farkle();
+    public int calcularPuntos(ArrayList<Dado> dados) {
+        int puntos = 0;
+        for (Dado dado : dados) {
+            if (dado.getValor() == 1) {
+                puntos += 100;
+            } else if (dado.getValor() == 5) {
+                puntos += 50;
+            }
+        }
+        return puntos;
     }
+
+        public static void main (String[]args){
+            Farkle juego = new Farkle();
+            juego.comenzarJuego();
+        }
 }
