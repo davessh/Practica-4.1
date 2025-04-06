@@ -88,7 +88,7 @@ public class Farkle {
             return false;
         }
 
-        int valorInicial = dados.get(0).getValor();
+        int valorInicial = dadosEnJuego.get(0).getValor();
         for(Dado dado : dadosEnJuego){
             if(dado.getValor() != valorInicial){
                 return false;
