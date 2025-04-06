@@ -12,6 +12,7 @@ public class Dado {
     public void lanzar() {
         Random rnd = new Random();
         valor = rnd.nextInt(6) +1;
+        //String ruta = ""
         String ruta = "C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\dado" + valor + ".png";
         Icon icono = new ImageIcon(ruta);
 
@@ -23,6 +24,7 @@ public class Dado {
         boton.setContentAreaFilled(false);
 
     }
+
     public JButton getBoton() {
         return boton;
     }
