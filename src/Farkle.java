@@ -70,7 +70,7 @@ public class Farkle {
                     // Calcular puntos y actualizar
                     int puntosGanados = calcularPuntos(seleccionados);
                     puntosTurno += puntosGanados;
-                    jugadorActual.sumarPuntos(puntosGanados);
+                    //jugadorActual.sumarPuntos(puntosGanados);
 
                     // Mover dados seleccionados
                     for (Dado dado : seleccionados) {
@@ -106,7 +106,7 @@ public class Farkle {
             }
 
             // Verificar si alguien ganó
-            if (jugadorActual.getPuntuacionTotal() >= 10000) {
+            if (jugadorActual.getPuntuacionTotal() >= 1000) {
                 System.out.println("\n¡FELICIDADES " + jugadorActual.getNombre().toUpperCase() + "! ¡HAS GANADO EL JUEGO!");
                 System.out.println("Puntuación final: " + jugadorActual.getPuntuacionTotal());
                 break;
