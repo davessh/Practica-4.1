@@ -16,7 +16,6 @@ public class Jugador {
         this.estaActivo = false;
     }
 
-
 //    public ArrayList<Dado> tirarDados() {
 //        ArrayList<Dado> dadosGenerados = new ArrayList<>();
 //
@@ -36,7 +35,7 @@ public class Jugador {
     }
 
     public void sumarPuntos(int puntos) {
-        this.puntuacionRonda += puntos;
+        this.puntuacionTotal += puntos;
     }
 
     public void iniciarTurno(){
