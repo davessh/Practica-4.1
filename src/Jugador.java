@@ -56,6 +56,10 @@ public class Jugador {
         return puntuacionTotal;
     }
 
+    public void setPuntuacionRonda(int puntuacionRonda) {
+        this.puntuacionRonda = puntuacionRonda;
+    }
+
     public int getPuntuacionRonda() {
         return puntuacionRonda;
     }
