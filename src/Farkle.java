@@ -5,8 +5,6 @@ public class Farkle {
     private ArrayList<Dado> dadosSeleccionados;
     private ArrayList<Jugador> jugadores;
     private int puntosTurno;
-    boolean esEscalera = true;
-    boolean todosIguales = true;
     private int turnoActual;
 
     public Farkle() {
@@ -27,11 +25,15 @@ public class Farkle {
 
             boolean tieneCombinacion = hayCombinaciones(dadosEnJuego);
             if (tieneCombinacion) {
-                jugadorActual.sumarPuntos(calcularPuntos(dadosEnJuego));
-                System.out.println(jugadorActual.getNombre() + " tiene puntos de combinacion");
-            }
-            else {
-                System.out.println(jugadorActual.getNombre() + "Farkle,no tiene combinación");
+                int puntos = calcularPuntos(dadosEnJuego);
+                jugadorActual.sumarPuntos(puntos);
+                System.out.println(jugadorActual.getNombre() + " tiene puntos de combinacion: " + puntos);
+                for (String combinacion : obtenerCombinaciones(dadosEnJuego)) {
+                    System.out.println("- " + combinacion);
+                }
+                System.out.println("Puntos ganados: " + puntos);
+            } else {
+                System.out.println(jugadorActual.getNombre() + " Farkle, no tiene combinación");
                 jugadorActual.terminarTurno(false);
                 turnoActual = (turnoActual + 1) % jugadores.size();
                 continue;
@@ -42,11 +44,9 @@ public class Farkle {
                 break;  // Termina el juego
             }
 
-
             jugadorActual.terminarTurno(false);
             turnoActual = (turnoActual + 1) % jugadores.size();
         }
-
     }
 
     public ArrayList<Dado> lanzarDados() {
@@ -59,66 +59,73 @@ public class Farkle {
         return dadosEnJuego;
     }
 
-    public boolean hayCombinaciones(ArrayList<Dado> dados) {
+    public int[] contadorCoincidencias(ArrayList<Dado> dados) {
         int[] contador = new int[7];
-        //Se cuenta cuántas veces salió un valor en los dados lanzados y sirve para saber cuales valores podrían formar combinaciones
-        for(Dado dado : dadosEnJuego){
+        for (Dado dado : dados) {
             contador[dado.getValor()]++;
         }
-        boolean combinacion = false;
+        return contador;
+    }
 
-        //Si hay unos o cincos
-        if (contador[1] > 0 || contador[5] > 0) {
-            combinacion = true;
-        }
-        //Si hay tres del mismo valor
-        for (int i = 1; i <= 6; i++) {
-            if (contador[i] >= 3) {
-                combinacion = true;
-            }
-        }
-        // se verifica si es escalera
+    public boolean hayCombinaciones(ArrayList<Dado> dados) {
+        int[] contador = contadorCoincidencias(dados);
+        return esEscalera(contador)
+                || hay3Pares(contador)
+                || hayTresIguales(contador)
+                || hayCuatroIguales(contador)
+                || sonTodosIguales();
+    }
+
+    private boolean esEscalera(int[] contador) {
         for (int i = 1; i <= 6; i++) {
             if (contador[i] != 1) {
-                esEscalera = false;
-                break;
+                return false;
             }
         }
+        return true;
+    }
 
-        if (esEscalera) {
-            combinacion = true;
+    private boolean hayTresIguales(int[] contador) {
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 3) {
+                return true;
+            }
         }
+        return false;
+    }
 
-        //Si hay 3 pares
+    private boolean hayCuatroIguales(int[] contador) {
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 4) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hay3Pares(int[] contador) {
         int pares = 0;
         for (int i = 1; i <= 6; i++) {
             if (contador[i] == 2) {
                 pares++;
             }
         }
-        if (pares == 3) {
-            combinacion = true;
-        }
-
-        return combinacion;
-
+        return pares == 3;
     }
 
-    //método diseñado para determinar si todos mis valores tirados son iguales
-    public boolean sonTodosIguales(){
-        if (dadosEnJuego.isEmpty()){
+    public boolean sonTodosIguales() {
+        if (dadosEnJuego.isEmpty()) {
             return false;
         }
 
         int valorInicial = dadosEnJuego.get(0).getValor();
-        for(Dado dado : dadosEnJuego){
-            if(dado.getValor() != valorInicial){
+        for (Dado dado : dadosEnJuego) {
+            if (dado.getValor() != valorInicial) {
                 return false;
             }
-            }
-        return true;
         }
-
+        return true;
+    }
 
     public void seleccionarDado(Dado dado) {
         dadosEnJuego.remove(dado);
@@ -131,19 +138,77 @@ public class Farkle {
     }
 
     public int calcularPuntos(ArrayList<Dado> dados) {
+        int[] contador = contadorCoincidencias(dados);
         int puntos = 0;
-        for (Dado dado : dados) {
-            if (dado.getValor() == 1) {
-                puntos += 100;
-            } else if (dado.getValor() == 5) {
-                puntos += 50;
+
+        // Escalera: 1 al 6, cada uno una vez
+        if (esEscalera(contador)) {
+            return 1500;
+        }
+
+        // Tres pares
+        if (hay3Pares(contador)) {
+            return 1500;
+        }
+
+        // Dos ternas
+        int ternas = 0;
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] == 3) {
+                ternas++;
             }
         }
+        if (ternas == 2) {
+            return 2500;
+        }
+
+        // Repeticiones de 3 o más
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 3) {
+                int base = (i == 1) ? 1000 : i * 100;
+                int multiplicador = contador[i] - 2;
+                puntos += base * multiplicador;
+                contador[i] = 0; // Reset the count for these dice
+            }
+        }
+
+        // Unos y cincos sueltos
+        puntos += contador[1] * 100;
+        puntos += contador[5] * 50;
+
         return puntos;
     }
 
-        public static void main (String[]args){
-            Farkle juego = new Farkle();
-            juego.comenzarJuego();
+    public ArrayList<String> obtenerCombinaciones(ArrayList<Dado> dados) {
+        ArrayList<String> combinaciones = new ArrayList<>();
+        int[] contador = contadorCoincidencias(dados);
+
+        if (esEscalera(contador)) {
+            combinaciones.add("Escalera (1-6)");
         }
+
+        if (hay3Pares(contador)) {
+            combinaciones.add("Tres pares");
+        }
+
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 3) {
+                combinaciones.add("Tres o más " + i + "s");
+            }
+            if (i == 1 && contador[i] > 0 && contador[i] < 3) {
+                combinaciones.add(contador[i] + " uno(s) individuales");
+            }
+            if (i == 5 && contador[i] > 0 && contador[i] < 3) {
+                combinaciones.add(contador[i] + " cinco(s) individuales");
+            }
+        }
+
+        return combinaciones;
+    }
+
+    public static void main(String[] args) {
+        Farkle juego = new Farkle();
+        juego.comenzarJuego();
+    }
 }
+
