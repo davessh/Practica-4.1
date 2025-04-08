@@ -11,11 +11,14 @@ public class VentanaJuego {
     private ArrayList<Jugador> jugadores;  // ArrayList para los jugadores
     private Jugador jugadorActual;
 
-    private JPanel panelLanzados;
-    private JPanel panelSeleccionados;
-    private JPanel panelBotones;
+    private JPanel panelLanzados, panelSeleccionados, panelPuntuaciones, panelBotones;
+    private JButton botonTirar;
+    private JButton botonAcumular, botonJugar, botonSalir,botonMostrarCombinaciones;
     private JFrame frame;
     private Farkle juego;
+    private ArrayList<JLabel> etiquetasPuntuaciones;
+
+
 
     public VentanaJuego(Farkle juego) {
         dadosLanzados = new ArrayList<>();
@@ -35,30 +38,30 @@ public class VentanaJuego {
 
         JPanel panelMenu = new JPanel();
         panelMenu.setLayout(new BoxLayout(panelMenu, BoxLayout.Y_AXIS));
-        panelMenu.setBackground(Color.BLUE);
+        panelMenu.setBackground(new Color(255,252,201));
 
-        //ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
-        ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        //ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
         JLabel etiquetaImagen = new JLabel(icono);
         etiquetaImagen.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelMenu.add(Box.createVerticalStrut(20));
         panelMenu.add(etiquetaImagen);
 
-        JButton btnJugar = new JButton("Jugar");
-        btnJugar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnJugar.setMaximumSize(new Dimension(200, 40));
+        botonJugar = new JButton("Jugar");
+        botonJugar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        botonJugar.setMaximumSize(new Dimension(200, 40));
         panelMenu.add(Box.createVerticalStrut(30));
-        panelMenu.add(btnJugar);
+        panelMenu.add(botonJugar);
 
-        JButton btnSalir = new JButton("Salir");
-        btnSalir.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnSalir.setMaximumSize(new Dimension(200, 40));
+        botonSalir = new JButton("Salir");
+        botonSalir.setAlignmentX(Component.CENTER_ALIGNMENT);
+        botonSalir.setMaximumSize(new Dimension(200, 40));
         panelMenu.add(Box.createVerticalStrut(10));
-        panelMenu.add(btnSalir);
+        panelMenu.add(botonSalir);
 
-        btnSalir.addActionListener(e -> System.exit(0));
+        botonSalir.addActionListener(e -> System.exit(0));
 
-        btnJugar.addActionListener(e -> {
+        botonJugar.addActionListener(e -> {
             frame.dispose();
             inicializarJugadores();
             iniciarJuego();
@@ -106,48 +109,122 @@ public class VentanaJuego {
     public void iniciarJuego() {
         frame = new JFrame("Juego Farkle");
         frame.setSize(1000, 800);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(null);
+        frame.setLayout(new BorderLayout());
+
+
+        etiquetasPuntuaciones = new ArrayList<>();
+
+        panelPuntuaciones = new JPanel();
+        panelPuntuaciones.setBounds(800, 50, 150, 300);
+        panelPuntuaciones.setLayout(new BoxLayout(panelPuntuaciones, BoxLayout.Y_AXIS));
+        panelPuntuaciones.setBackground(new Color(230,241,250));
+        frame.add(panelPuntuaciones);
+
+        actualizarPuntuaciones();
 
         panelLanzados = new JPanel();
         panelLanzados.setBounds(250, 50, 500, 500);
+        panelLanzados.setBackground(new Color(255,252,201));
         panelLanzados.setOpaque(false);
         frame.add(panelLanzados);
 
         panelSeleccionados = new JPanel();
         panelSeleccionados.setBounds(250, 250, 500, 500);
-        panelSeleccionados.setOpaque(false);
+        panelSeleccionados.setBackground(new Color(255,252,201));
+        panelSeleccionados.setOpaque(true);
         frame.add(panelSeleccionados);
 
-        //panelBotones = new JPanel();
-        //panelBotones()
 
 
-        JButton botonTirar = new JButton("Tirar dados");
+
+
+        botonTirar = new JButton("Tirar dados");
         botonTirar.setBounds(320, 170, 120, 40);
         frame.add(botonTirar);
 
-        JButton botonAcumular = new JButton("Acumular");
+        botonAcumular = new JButton("Acumular");
         botonAcumular.setBounds(440, 170, 120, 40);
         frame.add(botonAcumular);
 
-        JButton botonMostrarCombinaciones = new JButton("Mostrar tabla");
+        botonMostrarCombinaciones = new JButton("Mostrar tabla");
         botonMostrarCombinaciones.setBounds(560,170,120,40);
         frame.add(botonMostrarCombinaciones);
 
+        panelBotones = new JPanel();
+        panelBotones.setBounds(320, 500, 120, 40);
+        panelBotones.add(botonTirar);
+        panelBotones.add(botonAcumular);
+        panelBotones.add(botonMostrarCombinaciones);
+        frame.add(panelBotones);
+        panelBotones.setBackground(new Color(255,252,201));
+        panelBotones.setOpaque(true);
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().setBackground(new Color(208, 240, 192));
+        frame.setVisible(true);
+
         botonTirar.addActionListener(e -> {
             tirarDados();
+            puedeAcumular();
+        });
+        botonAcumular.addActionListener(e -> {
+            if(puedeAcumular()){
+               boolean tieneCombinacion= juego.hayCombinaciones(dadosLanzados);
+               if(tieneCombinacion && juego.esHotDice(dadosLanzados)){
+                   int puntuacionOptima = juego.calcularPuntuacionOptima(dadosLanzados);
+                   //Agregar algo para que diga que fue hotdice
+                   //Se preggunta si quiere tirar otra vez o acumular
+                   //if
+                   juego.setPuntosTurno(juego.getPuntosTurno()+puntuacionOptima);
+                   jugadorActual.sumarPuntos(puntuacionOptima);
+                   actualizarPuntuaciones();
+                   dadosSeleccionados.clear();
+                   dadosLanzados.clear();
+                   dadosLanzados = juego.lanzarDados();
+               }
+//               else if(tieneCombinacion){
+
+               //}
+            }
+
         });
 
         botonMostrarCombinaciones.addActionListener(e -> {
             mostrarCombinaciones();
         });
-        frame.setVisible(true);
     }
 
+    private void actualizarPuntuaciones() {
+        panelPuntuaciones.removeAll();         // Borra etiquetas viejas
+        etiquetasPuntuaciones.clear();         // Limpia la lista
+
+        for (Jugador jugador : jugadores) {
+            JLabel etiqueta = new JLabel(jugador.getNombre() + ": " + jugador.getPuntuacionTotal() + " puntos");
+            etiqueta.setFont(new Font("Arial", Font.BOLD, 14));
+            etiqueta.setForeground(Color.BLACK);
+            etiquetasPuntuaciones.add(etiqueta);
+            panelPuntuaciones.add(etiqueta);
+        }
+
+        panelPuntuaciones.revalidate();
+        panelPuntuaciones.repaint();
+    }
+
+    private boolean puedeAcumular(){
+        if(dadosSeleccionados.isEmpty()) {
+            botonAcumular.setEnabled(false);
+            return false;
+        } else if(juego.hayCombinaciones(dadosLanzados)) {
+            botonAcumular.setEnabled(true);
+            return true;
+        }
+        botonAcumular.setEnabled(false);
+        return false;
+    }
     private void tirarDados() {
         dadosLanzados.clear();
         dadosLanzados = juego.lanzarDados();
+        juego.setDadosEnJuego(dadosLanzados);
         panelLanzados.removeAll();
 
 
@@ -161,6 +238,8 @@ public class VentanaJuego {
         panelLanzados.repaint();
     }
 
+
+
     private void moverDado(Dado dado) {
         if (dadosLanzados.contains(dado)) {
             panelLanzados.remove(dado.getBoton());
@@ -168,7 +247,7 @@ public class VentanaJuego {
 
             dadosLanzados.remove(dado);
             dadosSeleccionados.add(dado);
-            dado.getBoton().setEnabled(false);
+//            dado.getBoton().setEnabled(false);
             juego.seleccionarDado(dado);
         } else if (dadosSeleccionados.contains(dado)) {
             panelSeleccionados.remove(dado.getBoton());
