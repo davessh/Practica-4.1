@@ -139,6 +139,7 @@ public class VentanaJuego {
 
             dadosLanzados.remove(dado);
             dadosSeleccionados.add(dado);
+            dado.getBoton().setEnabled(false);
             juego.seleccionarDado(dado);
         } else if (dadosSeleccionados.contains(dado)) {
             panelSeleccionados.remove(dado.getBoton());

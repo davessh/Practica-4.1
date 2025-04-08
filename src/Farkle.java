@@ -98,6 +98,15 @@ public class Farkle {
                     } else {
                         dadosEnJuego = lanzarDados();
                     }
+                } else if(dadosEnJuego.isEmpty()) {
+                    System.out.println("Se quedó sin dados, desea volver a tirar? s/n");
+                    String continuar = scanner.nextLine().toLowerCase();
+                    if (!continuar.equals("s")) {
+                        jugadorActual.sumarPuntos(puntosTurno);
+                        System.out.println(jugadorActual.getNombre() + " suma " + puntosTurno + " puntos. Total: " + jugadorActual.getPuntuacionTotal());
+                        turnoActivo = false;
+                    } else
+                        dadosEnJuego = lanzarDados();
                 } else {
                     System.out.println(jugadorActual.getNombre() + " ¡Farkle! No hay combinaciones posibles.");
                     puntosTurno = 0;
@@ -114,6 +123,8 @@ public class Farkle {
 
             // Pasar al siguiente jugador
             jugadorActual.terminarTurno(false);
+            dadosEnJuego.clear();
+            dadosSeleccionados.clear();
             turnoActual = (turnoActual + 1) % jugadores.size();
         }
         scanner.close();
@@ -186,14 +197,18 @@ public class Farkle {
         }
 
         // Verificar combinaciones de iguales
-        for (int i = 1; i <= 6; i++) {
-            if (contador[i] >= 3 || (i == 1 && contador[i] > 0) || (i == 5 && contador[i] > 0)) {
-                return true;
-            }
+        if (hayTresIguales(contador) || hayCuatroIguales(contador) || hayCincoIguales(contador) || haySeisIguales(contador)) {
+            return true;
+        }
+
+        // Verificar unos y cincos individuales
+        if (contador[1] > 0 || contador[5] > 0) {
+            return true;
         }
 
         return false;
     }
+
 
     private boolean esEscalera(int[] contador) {
         for (int i = 1; i <= 6; i++) {
@@ -212,6 +227,7 @@ public class Farkle {
         }
         return false;
     }
+
 
     private boolean hayCuatroIguales(int[] contador) {
         for (int i = 1; i <= 6; i++) {
@@ -232,18 +248,22 @@ public class Farkle {
         return pares == 3;
     }
 
-    public boolean sonTodosIguales() {
-        if (dadosEnJuego.isEmpty()) {
-            return false;
-        }
-
-        int valorInicial = dadosEnJuego.get(0).getValor();
-        for (Dado dado : dadosEnJuego) {
-            if (dado.getValor() != valorInicial) {
-                return false;
+    private boolean haySeisIguales(int[] contador) {
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] == 6) {
+                return true;
             }
         }
-        return true;
+        return false;
+    }
+
+    private boolean hayCincoIguales(int[] contador) {
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 5) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void seleccionarDado(Dado dado) {
@@ -300,7 +320,7 @@ public class Farkle {
         int[] contador = contadorCoincidencias(dados);
 
         if (esEscalera(contador)) {
-            combinaciones.add("Escalera (1-6)");
+        combinaciones.add("Escalera (1-6)");
         }
 
         if (hay3Pares(contador)) {
@@ -320,6 +340,10 @@ public class Farkle {
         }
 
         return combinaciones;
+    }
+
+    public boolean hayFarkle(){
+        return hayCombinaciones(dadosEnJuego);
     }
 
     private String obtenerValoresDados(ArrayList<Dado> dados) {
