@@ -279,32 +279,60 @@ public class Farkle {
     public int calcularPuntos(ArrayList<Dado> dados) {
         int[] contador = contadorCoincidencias(dados);
         int puntos = 0;
-        int totalDados = dados.size();
+        int trios = 0;
 
-        // Escalera completa
+        // Escalera completa (1-2-3-4-5-6) - 2500 puntos
         if (esEscalera(contador)) {
-            return 2500;
+            return 2500; // Esta combinación usa todos los dados, podemos retornar inmediatamente
         }
 
-        // Tres pares
+        // Tres pares - 1500 puntos
         if (hay3Pares(contador)) {
-            return 1500;
+            return 1500; // Esta combinación usa todos los dados, podemos retornar inmediatamente
         }
 
-        // Combinaciones de iguales
+        // 6 dados iguales - 3000 puntos
+        if(haySeisIguales(contador)) {
+            return 3000;
+        }
+
+        // Dos trios - 2500 puntos
         for (int i = 1; i <= 6; i++) {
-            if (contador[i] == 6) {
-                return 3000;
+            if (contador[i] >= 3) {
+                trios++;
             }
+        }
+        if (trios >= 2) {
+            return 2500; // Usa todos los dados
+        }
+
+        // Combinaciones especiales para unos (4 unos = 1000, 5 unos = 2000)
+        if (hayCuatroIguales(contador)) {
+            puntos += (contador[1] == 5) ? 2000 : 1000;
+            contador[1] = 0;
+        }
+
+        // Combinaciones de 5 iguales (2000 puntos) - excepto unos que ya se manejó
+        for (int i = 2; i <= 6; i++) {
             if (contador[i] == 5) {
-                return 2000;
+                puntos += 2000;
+                contador[i] = 0;
             }
+        }
+
+        // Combinaciones de 4 iguales (1000 puntos) - excepto unos que ya se manejó
+        for (int i = 2; i <= 6; i++) {
             if (contador[i] == 4) {
-                return 1000;
+                puntos += 1000;
+                contador[i] = 0;
             }
-            if (contador[i] == 3) {
+        }
+
+        // Trios (3 iguales)
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 3) {
                 puntos += (i == 1) ? 1000 : i * 100;
-                contador[i] = 0; // Reset para no contar estos dados nuevamente
+                contador[i] -= 3; // Restamos 3 para dejar los dados sobrantes
             }
         }
 

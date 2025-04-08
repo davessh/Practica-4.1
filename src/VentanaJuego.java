@@ -29,8 +29,8 @@ public class VentanaJuego {
         panelMenu.setLayout(new BoxLayout(panelMenu, BoxLayout.Y_AXIS));
         panelMenu.setBackground(Color.BLUE);
 
-        ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
-        //ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo.png");
+        //ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
         JLabel etiquetaImagen = new JLabel(icono);
         etiquetaImagen.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelMenu.add(Box.createVerticalStrut(20));
@@ -65,29 +65,45 @@ public class VentanaJuego {
         dadosSeleccionados = new ArrayList<>();
         this.juego = juego;
         this.jugadores = new ArrayList<>();
-        int cantidadJugadores = 2;
-        for (int i = 0; i < cantidadJugadores; i++) {
-            String nombreJugador = JOptionPane.showInputDialog(frame, "Ingresa el nombre del jugador " + (i + 1) + ":");
 
-            //nombres si no se ingresa nada
-            if (nombreJugador == null || nombreJugador.trim().isEmpty()) {
-                nombreJugador = "Jugador" + (i + 1);
+        int numeroCantidadDeJugadores;
+        do {
+            String cantidadJugadores = JOptionPane.showInputDialog(frame,
+                    "Ingresa la cantidad de jugadores (Mínimo 2, Máximo 10)");
+            if (cantidadJugadores == null) {
+                System.exit(0);
+                frame.dispose();
             }
+                try {
+                    numeroCantidadDeJugadores = Integer.parseInt(cantidadJugadores);
+                } catch (NumberFormatException e) {
+                    numeroCantidadDeJugadores = 0;
+                    JOptionPane.showMessageDialog(frame, "Debes ingresar un número válido",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+        } while (numeroCantidadDeJugadores < 2 || numeroCantidadDeJugadores > 10);
 
-            jugadores.add(new Jugador(nombreJugador));
-        }
+             for (int i = 0; i < numeroCantidadDeJugadores; i++) {
+                 String nombreJugador = JOptionPane.showInputDialog(frame, "Ingresa el nombre del jugador " + (i + 1) + ":");
+
+                 //nombres si no se ingresa nada
+                 if (nombreJugador == null || nombreJugador.trim().isEmpty()) {
+                     nombreJugador = "Jugador" + (i + 1);
+                 }
+                 jugadores.add(new Jugador(nombreJugador));
+             }
 
 
          jugadorActual = jugadores.get(0);
 
 
         frame = new JFrame("Juego Farkle");
-        frame.setSize(800, 800);
+        frame.setSize(1000, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
 
         panelLanzados = new JPanel();
-        panelLanzados.setBounds(50, 50, 500, 500);
+        panelLanzados.setBounds(250, 50, 500, 500);
         panelLanzados.setOpaque(false);
         frame.add(panelLanzados);
 
@@ -97,7 +113,7 @@ public class VentanaJuego {
         frame.add(panelSeleccionados);
 
         JButton btnTirar = new JButton("Tirar dados");
-        btnTirar.setBounds(230, 170, 120, 30);
+        btnTirar.setBounds(375, 170, 250, 40);
         frame.add(btnTirar);
 
         btnTirar.addActionListener(new ActionListener() {
@@ -106,16 +122,13 @@ public class VentanaJuego {
                 tirarDados();
             }
         });
-
         frame.setVisible(true);
     }
-
 
     private void tirarDados() {
 
         dadosLanzados.clear();
         dadosLanzados = juego.lanzarDados();
-
         panelLanzados.removeAll();
 
 
@@ -161,5 +174,9 @@ public class VentanaJuego {
         new VentanaJuego();  // Iniciar la ventana del juego
     }
 }
+
+//Cantidad de jugadores
+//Nombres de jugadores
+//cantidad de puntos limite
 
 
