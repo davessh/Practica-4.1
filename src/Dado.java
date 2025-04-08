@@ -17,7 +17,7 @@ public class Dado {
         Icon icono = new ImageIcon(ruta);
 
         Image img = ((ImageIcon) icono).getImage();
-        Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);  // Cambia el tamaño aquí
+        Image newImg = img.getScaledInstance(70, 70, Image.SCALE_SMOOTH);  // Cambia el tamaño aquí
         icono = new ImageIcon(newImg);
         boton = new JButton(icono);
         boton.setBorder(null);
