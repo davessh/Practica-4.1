@@ -19,15 +19,17 @@ public class Farkle {
     public void comenzarJuego() {
         Scanner scanner = new Scanner(System.in);
 
-        // Configuración inicial de jugadores
-        System.out.println("¡Bienvenidos a Farkle!");
-        System.out.print("Ingrese el nombre del Jugador 1: ");
-        String nombreJugador1 = scanner.nextLine();
-        System.out.print("Ingrese el nombre del Jugador 2: ");
-        String nombreJugador2 = scanner.nextLine();
+//        // Configuración inicial de jugadores
+//        System.out.println("¡Bienvenidos a Farkle!");
+//        System.out.print("Ingrese el nombre del Jugador 1: ");
+//        String nombreJugador1 = scanner.nextLine();
+//        System.out.print("Ingrese el nombre del Jugador 2: ");
+//        String nombreJugador2 = scanner.nextLine();
 
-        jugadores.add(new Jugador(nombreJugador1));
-        jugadores.add(new Jugador(nombreJugador2));
+//        jugadores.add(new Jugador(nombreJugador1));
+//        jugadores.add(new Jugador(nombreJugador2));
+
+
 
         while (true) {
             Jugador jugadorActual = jugadores.get(turnoActual);
@@ -44,7 +46,34 @@ public class Farkle {
                 System.out.println("\nDados lanzados: " + obtenerValoresDados(dadosEnJuego));
 
                 boolean tieneCombinacion = hayCombinaciones(dadosEnJuego);
-                if (tieneCombinacion) {
+                if (tieneCombinacion && esHotDice(dadosEnJuego)) {
+                    int puntuacionOptima = calcularPuntuacionOptima(dadosEnJuego);
+                    System.out.println("\n¡HOT DICE! Todos los dados pueden ser seleccionados.");
+                    System.out.println("Puntuación óptima: " + puntuacionOptima);
+
+                    // Automáticamente seleccionar todos los dados
+                    ArrayList<Dado> todosDados = new ArrayList<>(dadosEnJuego);
+
+                    // Preguntar si desea acumular la puntuación o volver a tirar
+                    System.out.print("¿Desea acumular esta puntuación (A) o volver a tirar los 6 dados (T)? ");
+                    String decision = scanner.nextLine().toUpperCase();
+
+                    if (decision.equals("A")) {
+                        // Acumular puntuación
+                        puntosTurno += puntuacionOptima;
+                        jugadorActual.sumarPuntos(puntosTurno);
+                        System.out.println(jugadorActual.getNombre() + " suma " + puntosTurno + " puntos. Total: " + jugadorActual.getPuntuacionTotal());
+                        turnoActivo = false;
+                    } else {
+                        // Volver a tirar todos los dados
+                        puntosTurno += puntuacionOptima;
+                        System.out.println("Puntos acumulados en este turno: " + puntosTurno);
+                        dadosEnJuego.clear();
+                        dadosSeleccionados.clear();
+                        dadosEnJuego = lanzarDados();
+                    }
+                }
+                else if (tieneCombinacion) {
                     ArrayList<String> combinaciones = obtenerCombinaciones(dadosEnJuego);
                     System.out.println("\nCombinaciones disponibles:");
                     for (String combinacion : combinaciones) {
@@ -115,7 +144,7 @@ public class Farkle {
             }
 
             // Verificar si alguien ganó
-            if (jugadorActual.getPuntuacionTotal() >= 1000) {
+            if (jugadorActual.getPuntuacionTotal() >= 5000) {
                 System.out.println("\n¡FELICIDADES " + jugadorActual.getNombre().toUpperCase() + "! ¡HAS GANADO EL JUEGO!");
                 System.out.println("Puntuación final: " + jugadorActual.getPuntuacionTotal());
                 break;
@@ -129,6 +158,45 @@ public class Farkle {
         }
         scanner.close();
     }
+
+    private boolean sonTodosSeleccionablesEnCombinacion(ArrayList<Dado> dados) {
+        int[] contador = contadorCoincidencias(dados);
+
+        // Si es escalera o 3 pares, todos los dados son parte de la combinación
+        if (esEscalera(contador) || hay3Pares(contador)) {
+            return true;
+        }
+
+        // Contar cuántos dados pueden ser parte de combinaciones válidas
+        int dadosEnCombinacion = 0;
+
+        // Verificar tríos o más
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 3) {
+                dadosEnCombinacion += contador[i];
+            } else if (i == 1) {
+                // Los 1 siempre cuentan
+                dadosEnCombinacion += contador[i];
+            } else if (i == 5) {
+                // Los 5 siempre cuentan
+                dadosEnCombinacion += contador[i];
+            }
+        }
+
+        return dadosEnCombinacion == dados.size();
+    }
+
+    public int calcularPuntuacionOptima(ArrayList<Dado> dados) {
+        // Si todos los dados pueden formar combinaciones, los seleccionamos todos
+        return calcularPuntos(dados);
+    }
+
+    public boolean esHotDice(ArrayList<Dado> dados) {
+        // Si todos los dados pueden ser seleccionados como combinación válida
+        return hayCombinaciones(dados) && sonTodosSeleccionablesEnCombinacion(dados);
+    }
+
+
 
     // Métodos auxiliares adicionales necesarios
     private ArrayList<Dado> procesarSeleccion(String input, ArrayList<Dado> dadosDisponibles) {
@@ -151,25 +219,20 @@ public class Farkle {
 
     private boolean esSeleccionValida(ArrayList<Dado> seleccion) {
         // Verifica que al menos haya un 1, un 5 o una combinación válida
-        int[] contador = new int[7];
-        for (Dado dado : seleccion) {
-            contador[dado.getValor()]++;
-        }
-
+        int[] contador = contadorCoincidencias(seleccion);
         // Verificar si hay 1s o 5s individuales
         if (contador[1] > 0 || contador[5] > 0) {
             return true;
         }
-
         // Verificar otras combinaciones
         for (int i = 1; i <= 6; i++) {
             if (contador[i] >= 3) {
                 return true;
             }
         }
-
         return false;
     }
+
     public ArrayList<Dado> lanzarDados() {
         dadosEnJuego.clear();
         int cantidadDados = 6 - dadosSeleccionados.size();
@@ -279,32 +342,60 @@ public class Farkle {
     public int calcularPuntos(ArrayList<Dado> dados) {
         int[] contador = contadorCoincidencias(dados);
         int puntos = 0;
-        int totalDados = dados.size();
+        int trios = 0;
 
-        // Escalera completa
+        // Escalera completa (1-2-3-4-5-6) - 2500 puntos
         if (esEscalera(contador)) {
-            return 2500;
+            return 2500; // Esta combinación usa todos los dados, podemos retornar inmediatamente
         }
 
-        // Tres pares
+        // Tres pares - 1500 puntos
         if (hay3Pares(contador)) {
-            return 1500;
+            return 1500; // Esta combinación usa todos los dados, podemos retornar inmediatamente
         }
 
-        // Combinaciones de iguales
+        // 6 dados iguales - 3000 puntos
+        if(haySeisIguales(contador)) {
+            return 3000;
+        }
+
+        // Dos trios - 2500 puntos
         for (int i = 1; i <= 6; i++) {
-            if (contador[i] == 6) {
-                return 3000;
+            if (contador[i] >= 3) {
+                trios++;
             }
+        }
+        if (trios >= 2) {
+            return 2500; // Usa todos los dados
+        }
+
+        // Combinaciones especiales para unos (4 unos = 1000, 5 unos = 2000)
+        if (hayCuatroIguales(contador)) {
+            puntos += (contador[1] == 5) ? 2000 : 1000;
+            contador[1] = 0;
+        }
+
+        // Combinaciones de 5 iguales (2000 puntos) - excepto unos que ya se manejó
+        for (int i = 2; i <= 6; i++) {
             if (contador[i] == 5) {
-                return 2000;
+                puntos += 2000;
+                contador[i] = 0;
             }
+        }
+
+        // Combinaciones de 4 iguales (1000 puntos) - excepto unos que ya se manejó
+        for (int i = 2; i <= 6; i++) {
             if (contador[i] == 4) {
-                return 1000;
+                puntos += 1000;
+                contador[i] = 0;
             }
-            if (contador[i] == 3) {
+        }
+
+        // Trios (3 iguales)
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] >= 3) {
                 puntos += (i == 1) ? 1000 : i * 100;
-                contador[i] = 0; // Reset para no contar estos dados nuevamente
+                contador[i] -= 3; // Restamos 3 para dejar los dados sobrantes
             }
         }
 
@@ -342,16 +433,52 @@ public class Farkle {
         return combinaciones;
     }
 
-    public boolean hayFarkle(){
-        return hayCombinaciones(dadosEnJuego);
-    }
-
     private String obtenerValoresDados(ArrayList<Dado> dados) {
         StringBuilder sb = new StringBuilder();
         for (Dado dado : dados) {
             sb.append(dado.getValor()).append(" ");
         }
         return sb.toString().trim();
+    }
+
+    public ArrayList<Dado> getDadosEnJuego() {
+        return dadosEnJuego;
+    }
+
+    public ArrayList<Dado> getDadosSeleccionados() {
+        return dadosSeleccionados;
+    }
+
+    public ArrayList<Jugador> getJugadores() {
+        return jugadores;
+    }
+
+    public int getPuntosTurno() {
+        return puntosTurno;
+    }
+
+    public int getTurnoActual() {
+        return turnoActual;
+    }
+
+    public void setDadosEnJuego(ArrayList<Dado> dadosEnJuego) {
+        this.dadosEnJuego = dadosEnJuego;
+    }
+
+    public void setDadosSeleccionados(ArrayList<Dado> dadosSeleccionados) {
+        this.dadosSeleccionados = dadosSeleccionados;
+    }
+
+    public void setJugadores(ArrayList<Jugador> jugadores) {
+        this.jugadores = jugadores;
+    }
+
+    public void setPuntosTurno(int puntosTurno) {
+        this.puntosTurno = puntosTurno;
+    }
+
+    public void setTurnoActual(int turnoActual) {
+        this.turnoActual = turnoActual;
     }
 
     public static void main(String[] args) {
