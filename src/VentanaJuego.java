@@ -40,8 +40,8 @@ public class VentanaJuego {
         panelMenu.setLayout(new BoxLayout(panelMenu, BoxLayout.Y_AXIS));
         panelMenu.setBackground(new Color(255,252,201));
 
-        ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
-        //ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        //ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
         JLabel etiquetaImagen = new JLabel(icono);
         etiquetaImagen.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelMenu.add(Box.createVerticalStrut(20));
@@ -115,7 +115,7 @@ public class VentanaJuego {
         etiquetasPuntuaciones = new ArrayList<>();
 
         panelPuntuaciones = new JPanel();
-        panelPuntuaciones.setBounds(800, 50, 150, 300);
+        panelPuntuaciones.setBounds(800, 50, 150, 200);
         panelPuntuaciones.setLayout(new BoxLayout(panelPuntuaciones, BoxLayout.Y_AXIS));
         panelPuntuaciones.setBackground(new Color(230,241,250));
         frame.add(panelPuntuaciones);
@@ -134,30 +134,19 @@ public class VentanaJuego {
         panelSeleccionados.setOpaque(true);
         frame.add(panelSeleccionados);
 
-
-
-
-
         botonTirar = new JButton("Tirar dados");
-        botonTirar.setBounds(320, 170, 120, 40);
-        frame.add(botonTirar);
-
         botonAcumular = new JButton("Acumular");
-        botonAcumular.setBounds(440, 170, 120, 40);
-        frame.add(botonAcumular);
-
         botonMostrarCombinaciones = new JButton("Mostrar tabla");
-        botonMostrarCombinaciones.setBounds(560,170,120,40);
-        frame.add(botonMostrarCombinaciones);
 
         panelBotones = new JPanel();
-        panelBotones.setBounds(320, 500, 120, 40);
+
+        panelBotones.setBounds(320, 500, 500, 50);
         panelBotones.add(botonTirar);
         panelBotones.add(botonAcumular);
         panelBotones.add(botonMostrarCombinaciones);
-        frame.add(panelBotones);
         panelBotones.setBackground(new Color(255,252,201));
         panelBotones.setOpaque(true);
+        frame.add(panelBotones);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setBackground(new Color(208, 240, 192));
@@ -168,30 +157,86 @@ public class VentanaJuego {
             puedeAcumular();
         });
         botonAcumular.addActionListener(e -> {
-            if(puedeAcumular()){
-               boolean tieneCombinacion= juego.hayCombinaciones(dadosLanzados);
-               if(tieneCombinacion && juego.esHotDice(dadosLanzados)){
-                   int puntuacionOptima = juego.calcularPuntuacionOptima(dadosLanzados);
-                   //Agregar algo para que diga que fue hotdice
-                   //Se preggunta si quiere tirar otra vez o acumular
-                   //if
-                   juego.setPuntosTurno(juego.getPuntosTurno()+puntuacionOptima);
-                   jugadorActual.sumarPuntos(puntuacionOptima);
-                   actualizarPuntuaciones();
-                   dadosSeleccionados.clear();
-                   dadosLanzados.clear();
-                   dadosLanzados = juego.lanzarDados();
-               }
-//               else if(tieneCombinacion){
+            if (puedeAcumular()) {
+                if (dadosSeleccionados.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Debes seleccionar al menos un dado",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-               //}
+                // Verificar si es un Hot Dice
+                if (juego.esHotDice(dadosLanzados)) {
+                    int puntuacionOptima = juego.calcularPuntuacionOptima(dadosLanzados);
+                    JOptionPane.showMessageDialog(frame, "¡HOT DICE! Todos los dados pueden ser seleccionados.\n" +
+                            "Obtienes " + puntuacionOptima + " puntos.", "Hot Dice", JOptionPane.INFORMATION_MESSAGE);
+
+                    juego.setPuntosTurno(juego.getPuntosTurno() + puntuacionOptima);
+                    jugadorActual.sumarPuntos(juego.getPuntosTurno());
+
+                    actualizarPuntuaciones();
+                    siguienteTurno();
+                    return;
+                }
+
+                if (juego.esSeleccionValida(dadosSeleccionados)) {
+                    int puntosGanados = juego.calcularPuntos(dadosSeleccionados);
+                    juego.setPuntosTurno(juego.getPuntosTurno() + puntosGanados);
+
+                    JOptionPane.showMessageDialog(frame,
+                            "Has seleccionado una combinación válida.\n" +
+                                    "Puntos ganados: " + puntosGanados + "\n" +
+                                    "Puntos acumulados en este turno: " + juego.getPuntosTurno(),
+                            "Combinación Válida", JOptionPane.INFORMATION_MESSAGE);
+
+                    jugadorActual.sumarPuntos(juego.getPuntosTurno());
+
+                    actualizarPuntuaciones();
+                    siguienteTurno();
+                } else {
+                    JOptionPane.showMessageDialog(frame,
+                            "La selección no forma una combinación válida",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
-
         });
 
         botonMostrarCombinaciones.addActionListener(e -> {
             mostrarCombinaciones();
         });
+    }
+
+    private void siguienteTurno() {
+        dadosLanzados.clear();
+        dadosSeleccionados.clear();
+        juego.setDadosEnJuego(new ArrayList<>());
+        juego.setDadosSeleccionados(new ArrayList<>());
+
+        if (jugadorActual.getPuntuacionTotal() >= 5000) {
+            JOptionPane.showMessageDialog(frame,
+                    "¡FELICIDADES " + jugadorActual.getNombre().toUpperCase() + "! ¡HAS GANADO EL JUEGO!",
+                    "Fin del Juego", JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();
+            iniciarMenuJuego();
+            return;
+        }
+
+        int turnoActual = juego.getTurnoActual();
+        turnoActual = (turnoActual + 1) % jugadores.size();
+        juego.setTurnoActual(turnoActual);
+        jugadorActual = jugadores.get(turnoActual);
+
+        panelLanzados.removeAll();
+        panelSeleccionados.removeAll();
+        panelLanzados.revalidate();
+        panelLanzados.repaint();
+        panelSeleccionados.revalidate();
+        panelSeleccionados.repaint();
+
+        juego.setPuntosTurno(0);
+
+        JOptionPane.showMessageDialog(frame,
+                "Turno de " + jugadorActual.getNombre(),
+                "Cambio de Turno", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void actualizarPuntuaciones() {
@@ -210,11 +255,14 @@ public class VentanaJuego {
         panelPuntuaciones.repaint();
     }
 
-    private boolean puedeAcumular(){
-        if(dadosSeleccionados.isEmpty()) {
+    private boolean puedeAcumular() {
+        if (dadosSeleccionados.isEmpty()) {
             botonAcumular.setEnabled(false);
             return false;
-        } else if(juego.hayCombinaciones(dadosLanzados)) {
+        } else if (juego.esSeleccionValida(dadosSeleccionados)) {
+            botonAcumular.setEnabled(true);
+            return true;
+        } else if (juego.esHotDice(dadosLanzados)) {
             botonAcumular.setEnabled(true);
             return true;
         }
