@@ -194,8 +194,6 @@ public class Farkle {
         return hayCombinaciones(dados) && sonTodosSeleccionablesEnCombinacion(dados);
     }
 
-
-
     // Métodos auxiliares adicionales necesarios
     private ArrayList<Dado> procesarSeleccion(String input, ArrayList<Dado> dadosDisponibles) {
         ArrayList<Dado> seleccionados = new ArrayList<>();

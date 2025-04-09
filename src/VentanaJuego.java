@@ -10,7 +10,7 @@ public class VentanaJuego {
     private ArrayList<Dado> dadosSeleccionados;
     private ArrayList<Jugador> jugadores;  // ArrayList para los jugadores
     private Jugador jugadorActual;
-
+    //private int puntosTurnoActual = 0;
     private JPanel panelLanzados, panelSeleccionados, panelPuntuaciones, panelBotones;
     private JButton botonTirar;
     private JButton botonAcumular, botonJugar, botonSalir,botonMostrarCombinaciones;
@@ -100,8 +100,8 @@ public class VentanaJuego {
             }
             jugadores.add(new Jugador(nombreJugador));
         }
-        juego.setJugadores(jugadores);
 
+        juego.setJugadores(jugadores);
 
         jugadorActual = jugadores.get(0);
 
@@ -163,6 +163,7 @@ public class VentanaJuego {
             tirarDados();
             puedeAcumular();
         });
+
         botonAcumular.addActionListener(e -> {
             if (puedeAcumular()) {
                 if (dadosSeleccionados.isEmpty()) {
@@ -181,7 +182,7 @@ public class VentanaJuego {
                     jugadorActual.sumarPuntos(juego.getPuntosTurno());
 
                     actualizarPuntuaciones();
-                    siguienteTurno();
+                    //siguienteTurno();
                     return;
                 }
 
@@ -277,7 +278,7 @@ public class VentanaJuego {
         return false;
     }
     private void tirarDados() {
-        // Si es el primer lanzamiento del turno, limpiamos todos los dados
+        // Si es el primer lanzamiento en el turno, limpiamos el Frame
         if (dadosLanzados.isEmpty() && dadosSeleccionados.isEmpty()) {
             dadosLanzados = juego.lanzarDados();
             juego.setDadosEnJuego(dadosLanzados);
@@ -305,7 +306,6 @@ public class VentanaJuego {
 
         panelLanzados.revalidate();
         panelLanzados.repaint();
-
         // Verifica si puede acumular después de tirar
         puedeAcumular();
     }
@@ -317,7 +317,7 @@ public class VentanaJuego {
 
             dadosLanzados.remove(dado);
             dadosSeleccionados.add(dado);
-//            dado.getBoton().setEnabled(false);
+            //dado.getBoton().setEnabled(false);
             juego.seleccionarDado(dado);
         } else if (dadosSeleccionados.contains(dado)) {
             panelSeleccionados.remove(dado.getBoton());
