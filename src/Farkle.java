@@ -29,8 +29,6 @@ public class Farkle {
 //        jugadores.add(new Jugador(nombreJugador1));
 //        jugadores.add(new Jugador(nombreJugador2));
 
-
-
         while (true) {
             Jugador jugadorActual = jugadores.get(turnoActual);
             System.out.println("\n--- Turno de " + jugadorActual.getNombre() + " ---");
@@ -479,6 +477,16 @@ public class Farkle {
 
     public void setTurnoActual(int turnoActual) {
         this.turnoActual = turnoActual;
+    }
+
+    public ArrayList<Dado> lanzarDadosRestantes(int cantidad) {
+        ArrayList<Dado> dados = new ArrayList<>();
+        for (int i = 0; i < cantidad; i++) {
+            Dado nuevoDado = new Dado();
+            nuevoDado.lanzar();
+            dados.add(nuevoDado);
+        }
+        return dados;
     }
 
     public static void main(String[] args) {

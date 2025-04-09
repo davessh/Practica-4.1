@@ -41,7 +41,8 @@ public class VentanaJuego {
         panelMenu.setBackground(new Color(255,252,201));
 
         //ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
-        ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        //ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        ImageIcon icono = new ImageIcon("C:\\Users\\GF76\\IdeaProjects\\Practica-4.2\\imagenes\\farkleLogo2.png");
         JLabel etiquetaImagen = new JLabel(icono);
         etiquetaImagen.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelMenu.add(Box.createVerticalStrut(20));
@@ -109,11 +110,11 @@ public class VentanaJuego {
     public void iniciarJuego() {
         frame = new JFrame("Juego Farkle");
         frame.setSize(1000, 800);
-        frame.setLayout(new BorderLayout());
-
+        frame.setLayout(null); // Usar layout nulo para posicionamiento absoluto
 
         etiquetasPuntuaciones = new ArrayList<>();
 
+        // Panel de puntuaciones (derecha)
         panelPuntuaciones = new JPanel();
         panelPuntuaciones.setBounds(800, 50, 150, 200);
         panelPuntuaciones.setLayout(new BoxLayout(panelPuntuaciones, BoxLayout.Y_AXIS));
@@ -122,30 +123,36 @@ public class VentanaJuego {
 
         actualizarPuntuaciones();
 
+        // Panel de dados lanzados (centro)
         panelLanzados = new JPanel();
-        panelLanzados.setBounds(250, 50, 500, 500);
+        panelLanzados.setBounds(250, 50, 500, 400); // Reducir altura para dejar espacio a los botones
         panelLanzados.setBackground(new Color(255,252,201));
-        panelLanzados.setOpaque(false);
         frame.add(panelLanzados);
 
+        // Panel de dados seleccionados (debajo de los lanzados)
         panelSeleccionados = new JPanel();
-        panelSeleccionados.setBounds(250, 250, 500, 500);
+        panelSeleccionados.setBounds(250, 450, 500, 100); // Ajustar posición y tamaño
         panelSeleccionados.setBackground(new Color(255,252,201));
-        panelSeleccionados.setOpaque(true);
         frame.add(panelSeleccionados);
+
+        // Panel de botones (debajo de los seleccionados)
+        panelBotones = new JPanel();
+        panelBotones.setBounds(250, 560, 500, 80); // Ajustar posición y tamaño
+        panelBotones.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20)); // Usar FlowLayout para espaciado uniforme
 
         botonTirar = new JButton("Tirar dados");
         botonAcumular = new JButton("Acumular");
         botonMostrarCombinaciones = new JButton("Mostrar tabla");
 
-        panelBotones = new JPanel();
+        // Ajustar tamaño preferido de los botones si es necesario
+        botonTirar.setPreferredSize(new Dimension(120, 40));
+        botonAcumular.setPreferredSize(new Dimension(120, 40));
+        botonMostrarCombinaciones.setPreferredSize(new Dimension(150, 40));
 
-        panelBotones.setBounds(320, 500, 500, 50);
         panelBotones.add(botonTirar);
         panelBotones.add(botonAcumular);
         panelBotones.add(botonMostrarCombinaciones);
         panelBotones.setBackground(new Color(255,252,201));
-        panelBotones.setOpaque(true);
         frame.add(panelBotones);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -270,11 +277,24 @@ public class VentanaJuego {
         return false;
     }
     private void tirarDados() {
-        dadosLanzados.clear();
-        dadosLanzados = juego.lanzarDados();
-        juego.setDadosEnJuego(dadosLanzados);
-        panelLanzados.removeAll();
+        // Si es el primer lanzamiento del turno, limpiamos todos los dados
+        if (dadosLanzados.isEmpty() && dadosSeleccionados.isEmpty()) {
+            dadosLanzados = juego.lanzarDados();
+            juego.setDadosEnJuego(dadosLanzados);
+        } else {
+            ArrayList<Dado> nuevosDados = juego.lanzarDadosRestantes(dadosLanzados.size());
 
+            dadosLanzados.clear();
+            dadosLanzados.addAll(nuevosDados);
+            juego.setDadosEnJuego(dadosLanzados);
+
+            //desabilitamos botones
+            for (Dado dado : dadosSeleccionados) {
+                dado.getBoton().setEnabled(false);
+            }
+        }
+
+        panelLanzados.removeAll();
 
         for (Dado dado : dadosLanzados) {
             dado.getBoton().addActionListener(ev -> {
@@ -282,11 +302,13 @@ public class VentanaJuego {
             });
             panelLanzados.add(dado.getBoton());
         }
+
         panelLanzados.revalidate();
         panelLanzados.repaint();
+
+        // Verifica si puede acumular después de tirar
+        puedeAcumular();
     }
-
-
 
     private void moverDado(Dado dado) {
         if (dadosLanzados.contains(dado)) {
@@ -314,7 +336,8 @@ public class VentanaJuego {
     public void mostrarCombinaciones() {
         JPanel panelDeCombinaciones = new JPanel();
         //JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\PC OSTRICH\\Pr-ctica-4\\Combinaciones.png"));
-        JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\Usuario\\Desktop\\Pr-ctica-4-main[1]\\Combinaciones.png"));
+        //JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\Usuario\\Desktop\\Pr-ctica-4-main[1]\\Combinaciones.png"));
+        JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\GF76\\IdeaProjects\\Practica-4.2\\imagenes\\img.png"));
         panelDeCombinaciones.add(labelDeCombinaciones);
         JOptionPane optionPane = new JOptionPane(panelDeCombinaciones, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION);
         JDialog ventanaC = optionPane.createDialog("Combinaciones");
@@ -322,10 +345,5 @@ public class VentanaJuego {
         ventanaC.setVisible(true);
     }
 }
-
-
-//Cantidad de jugadores
-//Nombres de jugadores
-//cantidad de puntos limite
 
 
