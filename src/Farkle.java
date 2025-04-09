@@ -217,7 +217,7 @@ public class Farkle {
         return seleccionados;
     }
 
-    private boolean esSeleccionValida(ArrayList<Dado> seleccion) {
+    public boolean esSeleccionValida(ArrayList<Dado> seleccion) {
         // Verifica que al menos haya un 1, un 5 o una combinación válida
         int[] contador = contadorCoincidencias(seleccion);
         // Verificar si hay 1s o 5s individuales
