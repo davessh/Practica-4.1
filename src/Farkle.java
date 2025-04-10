@@ -7,6 +7,7 @@ public class Farkle {
     private ArrayList<Jugador> jugadores;
     private int puntosTurno;
     private int turnoActual;
+    private int puntosParciales;
 
     public Farkle() {
         jugadores = new ArrayList<>();
@@ -14,6 +15,7 @@ public class Farkle {
         dadosSeleccionados = new ArrayList<>();
         turnoActual = 0;
         puntosTurno = 0;
+        puntosParciales=0;
     }
 
     public void comenzarJuego() {
@@ -231,6 +233,29 @@ public class Farkle {
         return false;
     }
 
+    public ArrayList<Dado> lanzarDados(int cantidad) {
+        ArrayList<Dado> dados = new ArrayList<>();
+        for (int i = 0; i < cantidad; i++) {
+            dados.add(new Dado());
+        }
+        return dados;
+    }
+    public void sumarPuntosParciales(int puntos) {
+        this.puntosParciales += puntos;
+    }
+    public void guardarPuntosParciales() {
+        this.puntosTurno += this.puntosParciales;
+        this.puntosParciales = 0;
+    }
+
+    public void sumarPuntosTurno(int puntos) {
+        this.puntosTurno += puntos;
+    }
+
+    public int getPuntosParciales() {
+        return puntosParciales;
+    }
+
     public ArrayList<Dado> lanzarDados() {
         dadosEnJuego.clear();
         int cantidadDados = 6 - dadosSeleccionados.size();
@@ -343,28 +368,27 @@ public class Farkle {
         int trios = 0;
 
         // Escalera completa (1-2-3-4-5-6) - 2500 puntos
-        if (esEscalera(contador)) {
+        if (esEscalera(contador) && dados.size() == 6) {
             return 2500; // Esta combinación usa todos los dados, podemos retornar inmediatamente
         }
 
         // Tres pares - 1500 puntos
-        if (hay3Pares(contador)) {
+        if (hay3Pares(contador) && dados.size() == 6) {
             return 1500; // Esta combinación usa todos los dados, podemos retornar inmediatamente
         }
 
         // 6 dados iguales - 3000 puntos
-        if(haySeisIguales(contador)) {
+        if (haySeisIguales(contador) && dados.size() == 6) {
             return 3000;
         }
-
-        // Dos trios - 2500 puntos
+        //Dos trios
         for (int i = 1; i <= 6; i++) {
             if (contador[i] >= 3) {
                 trios++;
             }
         }
-        if (trios >= 2) {
-            return 2500; // Usa todos los dados
+        if (trios >= 2 && dados.size() == 6) {
+            return 2500;
         }
 
         // Combinaciones especiales para unos (4 unos = 1000, 5 unos = 2000)
@@ -374,26 +398,40 @@ public class Farkle {
         }
 
         // Combinaciones de 5 iguales (2000 puntos) - excepto unos que ya se manejó
-        for (int i = 2; i <= 6; i++) {
+        for (int i = 1; i <= 6; i++) {
             if (contador[i] == 5) {
-                puntos += 2000;
-                contador[i] = 0;
+                if (i == 1) {
+                    puntos += 2000;
+                } else {
+                    puntos += 2000;
+                }
+                contador[i] = 0; // Los dados ya fueron contados
+                continue;
             }
         }
 
         // Combinaciones de 4 iguales (1000 puntos) - excepto unos que ya se manejó
-        for (int i = 2; i <= 6; i++) {
+        for (int i = 1; i <= 6; i++) {
             if (contador[i] == 4) {
-                puntos += 1000;
-                contador[i] = 0;
+                if (i == 1) {
+                    puntos += 1000;
+                } else {
+                    puntos += 1000;
+                }
+                contador[i] = 0; // Los dados ya fueron contados
+                continue;
             }
         }
 
         // Trios (3 iguales)
         for (int i = 1; i <= 6; i++) {
             if (contador[i] >= 3) {
-                puntos += (i == 1) ? 1000 : i * 100;
-                contador[i] -= 3; // Restamos 3 para dejar los dados sobrantes
+                if (i == 1) {
+                    puntos += 1000;
+                } else {
+                    puntos += i * 100;
+                }
+                contador[i] -= 3; // Restar los dados contados, pueden quedar sobrantes
             }
         }
 
@@ -477,6 +515,10 @@ public class Farkle {
 
     public void setTurnoActual(int turnoActual) {
         this.turnoActual = turnoActual;
+    }
+
+    public void setPuntosParciales(int puntosParciales) {
+        this.puntosParciales = puntosParciales;
     }
 
     public ArrayList<Dado> lanzarDadosRestantes(int cantidad) {
