@@ -42,8 +42,8 @@ public class VentanaJuego {
         panelMenu.setLayout(new BoxLayout(panelMenu, BoxLayout.Y_AXIS));
         panelMenu.setBackground(new Color(255,252,201));
 
-        ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
-        //ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        //ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
         //ImageIcon icono = new ImageIcon("C:\\Users\\GF76\\IdeaProjects\\Practica-4.2\\imagenes\\farkleLogo2.png");
         JLabel etiquetaImagen = new JLabel(icono);
         etiquetaImagen.setAlignmentX(Component.CENTER_ALIGNMENT);

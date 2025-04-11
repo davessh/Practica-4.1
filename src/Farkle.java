@@ -20,17 +20,6 @@ public class Farkle {
 
     public void comenzarJuego() {
         Scanner scanner = new Scanner(System.in);
-
-//        // Configuración inicial de jugadores
-//        System.out.println("¡Bienvenidos a Farkle!");
-//        System.out.print("Ingrese el nombre del Jugador 1: ");
-//        String nombreJugador1 = scanner.nextLine();
-//        System.out.print("Ingrese el nombre del Jugador 2: ");
-//        String nombreJugador2 = scanner.nextLine();
-
-//        jugadores.add(new Jugador(nombreJugador1));
-//        jugadores.add(new Jugador(nombreJugador2));
-
         while (true) {
             Jugador jugadorActual = jugadores.get(turnoActual);
             System.out.println("\n--- Turno de " + jugadorActual.getNombre() + " ---");
