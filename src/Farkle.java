@@ -218,21 +218,45 @@ public class Farkle {
     }
 
     public boolean esSeleccionValida(ArrayList<Dado> seleccion) {
-        // Verifica que al menos haya un 1, un 5 o una combinación válida
+        if (seleccion.isEmpty()) {
+            return false;
+        }
+
         int[] contador = contadorCoincidencias(seleccion);
-        // Verificar si hay 1s o 5s individuales
-        if (contador[1] > 0 || contador[5] > 0) {
+
+        // Verificar combinaciones especiales primero
+        if (esEscalera(contador) && seleccion.size() == 6) {
             return true;
         }
-        // Verificar otras combinaciones
+
+        if (hay3Pares(contador) && seleccion.size() == 6) {
+            return true;
+        }
+
+        // Verificar tríos o más
         for (int i = 1; i <= 6; i++) {
             if (contador[i] >= 3) {
+                // Si hay un trío, verificar que el resto sean 1s o 5s
+                for (int j = 1; j <= 6; j++) {
+                    if (j != i && contador[j] > 0) {
+                        if (j != 1 && j != 5) {
+                            return false;
+                        }
+                    }
+                }
                 return true;
             }
         }
-        return false;
-    }
 
+        // Si no hay tríos, verificar que todos sean 1s o 5s
+        for (int i = 1; i <= 6; i++) {
+            if (contador[i] > 0 && i != 1 && i != 5) {
+                return false;
+            }
+        }
+
+        return contador[1] > 0 || contador[5] > 0;
+    }
     public ArrayList<Dado> lanzarDados(int cantidad) {
         ArrayList<Dado> dados = new ArrayList<>();
         for (int i = 0; i < cantidad; i++) {
@@ -381,7 +405,8 @@ public class Farkle {
         if (haySeisIguales(contador) && dados.size() == 6) {
             return 3000;
         }
-        //Dos trios
+
+        // Contar tríos para combinación de dos tríos
         for (int i = 1; i <= 6; i++) {
             if (contador[i] >= 3) {
                 trios++;
@@ -391,57 +416,57 @@ public class Farkle {
             return 2500;
         }
 
-        // Combinaciones especiales para unos (4 unos = 1000, 5 unos = 2000)
-        if (hayCuatroIguales(contador)) {
-            puntos += (contador[1] == 5) ? 2000 : 1000;
-            contador[1] = 0;
-        }
-
-        // Combinaciones de 5 iguales (2000 puntos) - excepto unos que ya se manejó
+        // Procesar 5 dados iguales (2000 puntos para todos los números)
         for (int i = 1; i <= 6; i++) {
-            if (contador[i] == 5) {
-                if (i == 1) {
-                    puntos += 2000;
-                } else {
-                    puntos += 2000;
-                }
-                contador[i] = 0; // Los dados ya fueron contados
+            if (contador[i] >= 5) {
+                puntos += 2000;
+                contador[i] -= 5; // Restar los dados contados
                 continue;
             }
         }
 
-        // Combinaciones de 4 iguales (1000 puntos) - excepto unos que ya se manejó
+        // 4 dados iguales 1000 puntos
         for (int i = 1; i <= 6; i++) {
-            if (contador[i] == 4) {
-                if (i == 1) {
-                    puntos += 1000;
-                } else {
-                    puntos += 1000;
-                }
-                contador[i] = 0; // Los dados ya fueron contados
+            if (contador[i] >= 4) {
+                puntos += 1000;
+                contador[i] -= 4; // Restar los dados contados
                 continue;
             }
         }
 
-        // Trios (3 iguales)
+        // Procesar tríos (tercias) con sus valores específicos
         for (int i = 1; i <= 6; i++) {
             if (contador[i] >= 3) {
-                if (i == 1) {
-                    puntos += 1000;
-                } else {
-                    puntos += i * 100;
+                switch (i) {
+                    case 1:
+                        puntos += 1000; // Tercia de 1 = 1000 puntos
+                        break;
+                    case 2:
+                        puntos += 200;  // Tercia de 2 = 200 puntos
+                        break;
+                    case 3:
+                        puntos += 300;  // Tercia de 3 = 300 puntos
+                        break;
+                    case 4:
+                        puntos += 400;  // Tercia de 4 = 400 puntos
+                        break;
+                    case 5:
+                        puntos += 500;  // Tercia de 5 = 500 puntos
+                        break;
+                    case 6:
+                        puntos += 600;  // Tercia de 6 = 600 puntos
+                        break;
                 }
                 contador[i] -= 3; // Restar los dados contados, pueden quedar sobrantes
             }
         }
 
-        // Unos y cincos individuales
+        // Unos y cincos individuales (se suman a la puntuación de las combinaciones)
         puntos += contador[1] * 100;
         puntos += contador[5] * 50;
 
         return puntos;
     }
-
     public ArrayList<String> obtenerCombinaciones(ArrayList<Dado> dados) {
         ArrayList<String> combinaciones = new ArrayList<>();
         int[] contador = contadorCoincidencias(dados);

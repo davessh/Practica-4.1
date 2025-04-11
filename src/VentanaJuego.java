@@ -19,7 +19,7 @@ public class VentanaJuego {
     private JFrame frame;
     private Farkle juego;
     private ArrayList<JLabel> etiquetasPuntuaciones;
-
+    private JLabel etiquetaPuntosRonda;
 
 
     public VentanaJuego(Farkle juego) {
@@ -113,7 +113,7 @@ public class VentanaJuego {
     public void iniciarJuego() {
         frame = new JFrame("Juego Farkle");
         frame.setSize(1000, 800);
-        frame.setLayout(null); // Usar layout nulo para posicionamiento absoluto
+        frame.setLayout(null);
 
         etiquetasPuntuaciones = new ArrayList<>();
 
@@ -126,7 +126,7 @@ public class VentanaJuego {
 
         actualizarPuntuaciones();
 
-        // Panel de dados lanzados (centro)
+        // Panel de dados lanzados
         panelLanzados = new JPanel();
         panelLanzados.setBounds(250, 50, 500, 200); // Reducir altura para dejar espacio a los botones
         panelLanzados.setBackground(new Color(255,252,201));
@@ -170,8 +170,7 @@ public class VentanaJuego {
         etiquetaTurnoActual.setHorizontalAlignment(JLabel.CENTER);
         frame.add(etiquetaTurnoActual);
 
-        // Añadir etiqueta para puntos de la ronda
-        JLabel etiquetaPuntosRonda = new JLabel("Puntos ronda: 0");
+        etiquetaPuntosRonda = new JLabel("Puntos ronda:" + juego.getPuntosTurno());
         etiquetaPuntosRonda.setBounds(250, 530, 500, 30);
         etiquetaPuntosRonda.setFont(new Font("Arial", Font.PLAIN, 14));
         etiquetaPuntosRonda.setHorizontalAlignment(JLabel.CENTER);
@@ -247,12 +246,11 @@ public class VentanaJuego {
                 } else {
                     // Continuar jugando - habilitar el botón de tirar solamente
                     botonTirar.setEnabled(true);
-
+                    etiquetaPuntosRonda.setText("Puntos ronda: " + juego.getPuntosTurno());
                     // Deshabilitar los dados lanzados que no fueron seleccionados
                     for (Dado dado : dadosLanzados) {
                         dado.getBoton().setEnabled(false);
                     }
-                    etiquetaPuntosRonda.setText("Puntos ronda: " + juego.getPuntosTurno());
 
                     if (dadosLanzados.isEmpty() && (dadosBloqueados.size() == 6)) {
                         // Si ya seleccionó los 6 dados, debe lanzar 6 nuevos
@@ -312,8 +310,7 @@ public class VentanaJuego {
 
         // Resetear puntos del turno
         juego.setPuntosTurno(0);
-
-        // Notificar cambio de turno
+        etiquetaPuntosRonda.setText("Puntos ronda: " + juego.getPuntosTurno());        // Notificar cambio de turno
         JOptionPane.showMessageDialog(frame,
                 "Turno de " + jugadorActual.getNombre(),
                 "Cambio de Turno", JOptionPane.INFORMATION_MESSAGE);
@@ -345,12 +342,27 @@ public class VentanaJuego {
     }
 
     private void actualizarBotonAcumular() {
+        // Si no hay dados seleccionados, deshabilitar el botón
         if (dadosSeleccionados.isEmpty()) {
             botonAcumular.setEnabled(false);
-        } else if (juego.esSeleccionValida(dadosSeleccionados)) {
-            botonAcumular.setEnabled(true);
+            return;
+        }
+
+        // Verificar si la selección actual es válida
+        boolean esValida = juego.esSeleccionValida(dadosSeleccionados);
+        botonAcumular.setEnabled(esValida);
+
+        // Si la selección no es válida, mostrar feedback visual (opcional)
+        if (!esValida) {
+            // Puedes cambiar el color o mostrar un mensaje temporal si lo deseas
+            for (Dado dado : dadosSeleccionados) {
+                dado.getBoton().setBackground(Color.RED); // Resaltar en rojo los dados inválidos
+            }
         } else {
-            botonAcumular.setEnabled(false);
+            // Restablecer el color si es válido
+            for (Dado dado : dadosSeleccionados) {
+                dado.getBoton().setBackground(null); // Volver al color normal
+            }
         }
     }
 
@@ -396,7 +408,7 @@ public class VentanaJuego {
                 panelBloqueados.repaint();
 
                 dadosLanzados = juego.lanzarDados(6);
-                // Al tirar 6 dados nuevos, "guardar" los puntos anteriores
+
                 juego.guardarPuntosParciales();
             }
         }
@@ -422,7 +434,8 @@ public class VentanaJuego {
                     "¡FARKLE! No hay combinaciones válidas. Pierdes los puntos de esta ronda.",
                     "Farkle", JOptionPane.WARNING_MESSAGE);
             juego.setPuntosTurno(0); // Perder puntos de la ronda actual
-            juego.setPuntosParciales(0); // También resetear los puntos parciales
+            juego.setPuntosParciales(0);
+            etiquetaPuntosRonda.setText("Puntos ronda: 0");// También resetear los puntos parciales
             siguienteTurno();
             return;
         }
@@ -442,12 +455,14 @@ public class VentanaJuego {
                 int puntosAnteriores = juego.getPuntosParciales(); // Get previously accumulated points
                 juego.sumarPuntosTurno(puntuacionOptima + puntosAnteriores);
                 jugadorActual.sumarPuntos(juego.getPuntosTurno());
+                etiquetaPuntosRonda.setText("Puntos ronda: 0");
                 actualizarPuntuaciones();
                 siguienteTurno();
 
             } else {
                 int puntosAnteriores = juego.getPuntosParciales();
                 juego.sumarPuntosTurno(puntuacionOptima + puntosAnteriores);
+                etiquetaPuntosRonda.setText("Puntos ronda: " + juego.getPuntosTurno());
                 dadosLanzados.clear();
                 dadosSeleccionados.clear();
                 dadosBloqueados.clear();
@@ -479,7 +494,6 @@ public class VentanaJuego {
         }
 
         if (dadosLanzados.contains(dado)) {
-            // Mover de lanzados a seleccionados
             panelLanzados.remove(dado.getBoton());
             panelSeleccionados.add(dado.getBoton());
             dadosLanzados.remove(dado);
