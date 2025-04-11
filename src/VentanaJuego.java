@@ -43,8 +43,8 @@ public class VentanaJuego {
         panelMenu.setLayout(new BoxLayout(panelMenu, BoxLayout.Y_AXIS));
         panelMenu.setBackground(new Color(255,252,201));
 
-        ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
-        //ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        //ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
         //ImageIcon icono = new ImageIcon("C:\\Users\\GF76\\IdeaProjects\\Practica-4.2\\imagenes\\farkleLogo2.png");
         JLabel etiquetaImagen = new JLabel(icono);
         etiquetaImagen.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -439,13 +439,15 @@ public class VentanaJuego {
 
             if (respuesta == JOptionPane.YES_OPTION) {
                 // Acumular puntos y terminar turno
-                juego.sumarPuntosTurno(puntuacionOptima);
+                int puntosAnteriores = juego.getPuntosParciales(); // Get previously accumulated points
+                juego.sumarPuntosTurno(puntuacionOptima + puntosAnteriores);
                 jugadorActual.sumarPuntos(juego.getPuntosTurno());
                 actualizarPuntuaciones();
                 siguienteTurno();
+
             } else {
-                // Acumular puntos y seguir jugando con 6 nuevos dados
-                juego.sumarPuntosTurno(puntuacionOptima);
+                int puntosAnteriores = juego.getPuntosParciales();
+                juego.sumarPuntosTurno(puntuacionOptima + puntosAnteriores);
                 dadosLanzados.clear();
                 dadosSeleccionados.clear();
                 dadosBloqueados.clear();
@@ -500,8 +502,8 @@ public class VentanaJuego {
 
     public void mostrarCombinaciones() {
         JPanel panelDeCombinaciones = new JPanel();
-        //JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\PC OSTRICH\\Pr-ctica-4\\Combinaciones.png"));
-        JLabel labelDeCombinaciones = new JLabel(new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\img.png"));
+        JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.2\\imagenes\\img.png"));
+        //JLabel labelDeCombinaciones = new JLabel(new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\img.png"));
         //JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\GF76\\IdeaProjects\\Practica-4.2\\imagenes\\img.png"));
         panelDeCombinaciones.add(labelDeCombinaciones);
         JOptionPane optionPane = new JOptionPane(panelDeCombinaciones, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION);
