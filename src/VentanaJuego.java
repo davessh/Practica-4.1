@@ -11,7 +11,7 @@ public class VentanaJuego {
     private ArrayList<Dado> dadosBloqueados;      // Dados ya bloqueados de tiradas anteriores
     private ArrayList<Jugador> jugadores;  // ArrayList para los jugadores
     private Jugador jugadorActual;
-    private int puntosTiradaActual;
+    private int puntosTiradaActual, puntuacionLimite;
 
     private JPanel panelLanzados, panelSeleccionados, panelPuntuaciones, panelBloqueados, panelBotones;
     private JButton botonTirar;
@@ -19,8 +19,7 @@ public class VentanaJuego {
     private JFrame frame;
     private Farkle juego;
     private ArrayList<JLabel> etiquetasPuntuaciones;
-    private JLabel etiquetaPuntosRonda;
-
+    private JLabel etiquetaTurnoActual;
 
     public VentanaJuego(Farkle juego) {
         dadosLanzados = new ArrayList<>();
@@ -43,8 +42,8 @@ public class VentanaJuego {
         panelMenu.setLayout(new BoxLayout(panelMenu, BoxLayout.Y_AXIS));
         panelMenu.setBackground(new Color(255,252,201));
 
-        //ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
-        ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        ImageIcon icono = new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\farkleLogo2.png");
+        //ImageIcon icono = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.1\\imagenes\\farkleLogo2.png");
         //ImageIcon icono = new ImageIcon("C:\\Users\\GF76\\IdeaProjects\\Practica-4.2\\imagenes\\farkleLogo2.png");
         JLabel etiquetaImagen = new JLabel(icono);
         etiquetaImagen.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -68,6 +67,7 @@ public class VentanaJuego {
         botonJugar.addActionListener(e -> {
             frame.dispose();
             inicializarJugadores();
+            elegirPuntosLimite();
             iniciarJuego();
         });
 
@@ -108,6 +108,24 @@ public class VentanaJuego {
 
         jugadorActual = jugadores.get(0);
 
+    }
+
+    public void elegirPuntosLimite(){
+        do {
+            String limitePuntuacion = JOptionPane.showInputDialog(frame,
+                    "Ingresa la puntuación límite para ganar");
+            if (limitePuntuacion == null) {
+                System.exit(0);
+                frame.dispose();
+            }
+            try {
+                puntuacionLimite = Integer.parseInt(limitePuntuacion);
+            } catch (NumberFormatException e) {
+                puntuacionLimite = 0;
+                JOptionPane.showMessageDialog(frame, "Debes ingresar un número válido",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } while (puntuacionLimite < 0);
     }
 
     public void iniciarJuego() {
@@ -164,17 +182,12 @@ public class VentanaJuego {
         frame.add(panelBotones);
 
         // Añadir etiqueta informativa para turno actual
-        JLabel etiquetaTurnoActual = new JLabel("Turno de: " + jugadorActual.getNombre());
+        etiquetaTurnoActual = new JLabel("Turno de: " + jugadorActual.getNombre());
         etiquetaTurnoActual.setBounds(250, 500, 500, 30);
         etiquetaTurnoActual.setFont(new Font("Arial", Font.BOLD, 16));
         etiquetaTurnoActual.setHorizontalAlignment(JLabel.CENTER);
         frame.add(etiquetaTurnoActual);
 
-        etiquetaPuntosRonda = new JLabel("Puntos ronda:" + juego.getPuntosTurno());
-        etiquetaPuntosRonda.setBounds(250, 530, 500, 30);
-        etiquetaPuntosRonda.setFont(new Font("Arial", Font.PLAIN, 14));
-        etiquetaPuntosRonda.setHorizontalAlignment(JLabel.CENTER);
-        frame.add(etiquetaPuntosRonda);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setBackground(new Color(208, 240, 192));
@@ -183,7 +196,6 @@ public class VentanaJuego {
         botonTirar.addActionListener(e -> {
             tirarDados();
             actualizarBotonAcumular();
-            etiquetaPuntosRonda.setText("Puntos ronda: " + juego.getPuntosTurno());
         });
         botonAcumular.addActionListener(e -> {
             if (dadosSeleccionados.isEmpty()) {
@@ -200,7 +212,6 @@ public class VentanaJuego {
                 JOptionPane.showMessageDialog(frame,
                         "Has seleccionado una combinación válida.\n" +
                                 "Puntos ganados: " + puntosTiradaActual + "\n" +
-                                "Puntos acumulados en este turno: " + juego.getPuntosTurno() + "\n" +
                                 "Puntos pendientes por acumular: " + juego.getPuntosParciales(),
                         "Combinación Válida", JOptionPane.INFORMATION_MESSAGE);
 
@@ -240,13 +251,11 @@ public class VentanaJuego {
                     juego.guardarPuntosParciales(); // Asegurarse de que se añadan los puntos parciales
                     jugadorActual.sumarPuntos(juego.getPuntosTurno());
                     actualizarPuntuaciones();
-                    etiquetaPuntosRonda.setText("Puntos ronda: 0");
                     siguienteTurno();
                     etiquetaTurnoActual.setText("Turno de: " + jugadorActual.getNombre());
                 } else {
                     // Continuar jugando - habilitar el botón de tirar solamente
                     botonTirar.setEnabled(true);
-                    etiquetaPuntosRonda.setText("Puntos ronda: " + juego.getPuntosTurno());
                     // Deshabilitar los dados lanzados que no fueron seleccionados
                     for (Dado dado : dadosLanzados) {
                         dado.getBoton().setEnabled(false);
@@ -294,7 +303,7 @@ public class VentanaJuego {
         juego.setPuntosParciales(0);
 
         // Verificar si alguien ganó
-        if (jugadorActual.getPuntuacionTotal() >= 5000) {
+        if (jugadorActual.getPuntuacionTotal() >= puntuacionLimite) {
             JOptionPane.showMessageDialog(frame,
                     "¡FELICIDADES " + jugadorActual.getNombre().toUpperCase() + "! ¡HAS GANADO EL JUEGO!",
                     "Fin del Juego", JOptionPane.INFORMATION_MESSAGE);
@@ -310,7 +319,6 @@ public class VentanaJuego {
 
         // Resetear puntos del turno
         juego.setPuntosTurno(0);
-        etiquetaPuntosRonda.setText("Puntos ronda: " + juego.getPuntosTurno());        // Notificar cambio de turno
         JOptionPane.showMessageDialog(frame,
                 "Turno de " + jugadorActual.getNombre(),
                 "Cambio de Turno", JOptionPane.INFORMATION_MESSAGE);
@@ -435,8 +443,8 @@ public class VentanaJuego {
                     "Farkle", JOptionPane.WARNING_MESSAGE);
             juego.setPuntosTurno(0); // Perder puntos de la ronda actual
             juego.setPuntosParciales(0);
-            etiquetaPuntosRonda.setText("Puntos ronda: 0");// También resetear los puntos parciales
             siguienteTurno();
+            etiquetaTurnoActual.setText("Turno de: " + jugadorActual.getNombre());
             return;
         }
 
@@ -455,14 +463,12 @@ public class VentanaJuego {
                 int puntosAnteriores = juego.getPuntosParciales(); // Get previously accumulated points
                 juego.sumarPuntosTurno(puntuacionOptima + puntosAnteriores);
                 jugadorActual.sumarPuntos(juego.getPuntosTurno());
-                etiquetaPuntosRonda.setText("Puntos ronda: 0");
                 actualizarPuntuaciones();
                 siguienteTurno();
 
             } else {
                 int puntosAnteriores = juego.getPuntosParciales();
                 juego.sumarPuntosTurno(puntuacionOptima + puntosAnteriores);
-                etiquetaPuntosRonda.setText("Puntos ronda: " + juego.getPuntosTurno());
                 dadosLanzados.clear();
                 dadosSeleccionados.clear();
                 dadosBloqueados.clear();
@@ -516,8 +522,8 @@ public class VentanaJuego {
 
     public void mostrarCombinaciones() {
         JPanel panelDeCombinaciones = new JPanel();
-        JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.2\\imagenes\\img.png"));
-        //JLabel labelDeCombinaciones = new JLabel(new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\img.png"));
+        //JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\Practica-4.2\\imagenes\\img.png"));
+        JLabel labelDeCombinaciones = new JLabel(new ImageIcon("G:\\4toSemestre\\POO\\Practica-4.1\\imagenes\\img.png"));
         //JLabel labelDeCombinaciones = new JLabel(new ImageIcon("C:\\Users\\GF76\\IdeaProjects\\Practica-4.2\\imagenes\\img.png"));
         panelDeCombinaciones.add(labelDeCombinaciones);
         JOptionPane optionPane = new JOptionPane(panelDeCombinaciones, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION);
