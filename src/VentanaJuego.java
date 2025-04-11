@@ -20,6 +20,9 @@ public class VentanaJuego {
     private Farkle juego;
     private ArrayList<JLabel> etiquetasPuntuaciones;
     private JLabel etiquetaTurnoActual;
+    private boolean ultimaRonda = false;
+    private int ganadorTemporal = -1;
+    private ArrayList<Integer> jugadoresQueYaJugaron = new ArrayList<>();
 
     public VentanaJuego(Farkle juego) {
         dadosLanzados = new ArrayList<>();
@@ -302,37 +305,75 @@ public class VentanaJuego {
         juego.setDadosSeleccionados(new ArrayList<>());
         juego.setPuntosParciales(0);
 
-        // Verificar si alguien ganó
-        if (jugadorActual.getPuntuacionTotal() >= puntuacionLimite) {
+        // Verificar si alguien alcanzó la puntuación límite
+        if (!ultimaRonda && jugadorActual.getPuntuacionTotal() >= puntuacionLimite) {
             JOptionPane.showMessageDialog(frame,
-                    "¡FELICIDADES " + jugadorActual.getNombre().toUpperCase() + "! ¡HAS GANADO EL JUEGO!",
-                    "Fin del Juego", JOptionPane.INFORMATION_MESSAGE);
-            reiniciarJuego();
-            return;
+                    jugadorActual.getNombre().toUpperCase() + " ha llegado al máximo de puntos!",
+                    "Última Ronda", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(frame,
+                    "Último turno para cada jugador para superar este puntaje.",
+                    "Última Oportunidad", JOptionPane.INFORMATION_MESSAGE);
+
+            // Iniciar la última ronda
+            ultimaRonda = true;
+            ganadorTemporal = juego.getTurnoActual();
+            jugadoresQueYaJugaron.add(ganadorTemporal);
         }
 
-        // Actualizar el turno
+        // Determinar el siguiente jugador
         int turnoActual = juego.getTurnoActual();
-        turnoActual = (turnoActual + 1) % jugadores.size();
+
+        if (ultimaRonda) {
+            // Pasar al siguiente jugador que no ha jugado su último turno
+            do {
+                turnoActual = (turnoActual + 1) % jugadores.size();
+                // Si completamos la ronda y volvemos al jugador desencadenante, el juego termina
+                if (turnoActual == ganadorTemporal || jugadoresQueYaJugaron.size() == jugadores.size()) {
+                    // Todos han tenido su último turno, terminar juego y mostrar ganador
+                    finalizarJuego();
+                    return;
+                }
+            } while (jugadoresQueYaJugaron.contains(turnoActual));
+
+            // Registrar que este jugador ya tuvo su último turno
+            jugadoresQueYaJugaron.add(turnoActual);
+        } else {
+            // Juego normal, pasar al siguiente jugador
+            turnoActual = (turnoActual + 1) % jugadores.size();
+        }
+
         juego.setTurnoActual(turnoActual);
         jugadorActual = jugadores.get(turnoActual);
 
         // Resetear puntos del turno
         juego.setPuntosTurno(0);
-        JOptionPane.showMessageDialog(frame,
-                "Turno de " + jugadorActual.getNombre(),
-                "Cambio de Turno", JOptionPane.INFORMATION_MESSAGE);
+
+        // Si estamos en última ronda, mostrar un mensaje especial
+        if (ultimaRonda) {
+            JOptionPane.showMessageDialog(frame,
+                    "ÚLTIMA RONDA: Turno de " + jugadorActual.getNombre(),
+                    "Último Turno", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(frame,
+                    "Turno de " + jugadorActual.getNombre(),
+                    "Cambio de Turno", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        // Actualizar la etiqueta del turno
+        etiquetaTurnoActual.setText("Turno de: " + jugadorActual.getNombre());
 
         // Habilitar el botón de tirar y deshabilitar el de acumular
         botonTirar.setEnabled(true);
         botonAcumular.setEnabled(false);
     }
 
+
     private void actualizarPuntuaciones() {
         panelPuntuaciones.removeAll();
         etiquetasPuntuaciones.clear();
 
-        for (Jugador jugador : jugadores) {
+        //Cambio por uso de lamdas
+        jugadores.forEach(jugador -> {
             JLabel etiqueta = new JLabel(jugador.getNombre() + ": " + jugador.getPuntuacionTotal() + " puntos");
             if (jugador == jugadorActual) {
                 etiqueta.setFont(new Font("Arial", Font.BOLD, 14));
@@ -343,10 +384,23 @@ public class VentanaJuego {
             }
             etiquetasPuntuaciones.add(etiqueta);
             panelPuntuaciones.add(etiqueta);
-        }
-
+        });
         panelPuntuaciones.revalidate();
         panelPuntuaciones.repaint();
+    }
+
+    private void finalizarJuego() {
+        // Encontrar al jugador con más puntos utilizando una expresión lambda
+        Jugador ganador = jugadores.stream()
+                .max((j1, j2) -> Integer.compare(j1.getPuntuacionTotal(), j2.getPuntuacionTotal()))
+                .orElse(jugadores.get(0));
+
+        JOptionPane.showMessageDialog(frame,
+                "¡El juego ha terminado!\n\n" +
+                        "El ganador es: " + ganador.getNombre().toUpperCase() + "\n" +
+                        "Puntuación final: " + ganador.getPuntuacionTotal() + " puntos",
+                "Fin del Juego", JOptionPane.INFORMATION_MESSAGE);
+        reiniciarJuego();
     }
 
     private void actualizarBotonAcumular() {
@@ -373,19 +427,6 @@ public class VentanaJuego {
             }
         }
     }
-
-    private boolean puedeAcumular() {
-        if (dadosSeleccionados.isEmpty()) {
-            botonAcumular.setEnabled(false);
-            return false;
-        } else if (juego.esSeleccionValida(dadosSeleccionados)) {
-            botonAcumular.setEnabled(true);
-            return true;
-        }
-        botonAcumular.setEnabled(false);
-        return false;
-    }
-
     private void tirarDados() {
         // Limpiar los dados no seleccionados pero deshabilitados
         for (int i = dadosLanzados.size() - 1; i >= 0; i--) {
@@ -451,7 +492,8 @@ public class VentanaJuego {
         // Verificar si es Hot Dice
         if (juego.esHotDice(dadosLanzados)) {
             int puntuacionOptima = juego.calcularPuntuacionOptima(dadosLanzados);
-
+            int puntosAnteriores = juego.getPuntosParciales();
+            int puntosTotales = puntuacionOptima + puntosAnteriores;
             int respuesta = JOptionPane.showConfirmDialog(frame,
                     "¡HOT DICE! Todos los dados pueden ser seleccionados.\n" +
                             "Puntuación: " + puntuacionOptima + " puntos.\n\n" +
@@ -460,15 +502,13 @@ public class VentanaJuego {
 
             if (respuesta == JOptionPane.YES_OPTION) {
                 // Acumular puntos y terminar turno
-                int puntosAnteriores = juego.getPuntosParciales(); // Get previously accumulated points
-                juego.sumarPuntosTurno(puntuacionOptima + puntosAnteriores);
-                jugadorActual.sumarPuntos(juego.getPuntosTurno());
+                juego.setPuntosTurno(puntosTotales);
+                jugadorActual.sumarPuntos(puntosTotales);
                 actualizarPuntuaciones();
                 siguienteTurno();
 
             } else {
-                int puntosAnteriores = juego.getPuntosParciales();
-                juego.sumarPuntosTurno(puntuacionOptima + puntosAnteriores);
+                juego.setPuntosTurno(puntosTotales);
                 dadosLanzados.clear();
                 dadosSeleccionados.clear();
                 dadosBloqueados.clear();
